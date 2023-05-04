@@ -48,6 +48,7 @@ app.use(function (req, res, next) {
 
 app.use(methodOverride('_method'));
 app.use('/', indexRouter);
+
 app.use('/users', usersRouter);
 
 app.use(function (req, res, next) {

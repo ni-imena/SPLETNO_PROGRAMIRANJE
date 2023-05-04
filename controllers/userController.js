@@ -1,4 +1,7 @@
 var UserModel = require('../models/userModel.js');
+const jwt = require('jsonwebtoken');
+var bcrypt = require('bcrypt');
+require('dotenv').config();
 
 
 module.exports = {
@@ -37,24 +40,29 @@ module.exports = {
         });
     },
 
-    create: function (req, res) {
-        var user = new UserModel({
+    create: async function (req, res, next) {
+        var oldUser = await UserModel.findOne({ username: req.body.username });
+
+        if (oldUser) {
+            var err = new Error("Username is already Taken");
+            err.status = 409;
+            return next(err);
+        }
+
+        var password = await bcrypt.hash(req.body.password, 10);
+
+        const user = await UserModel.create({
             username: req.body.username,
-            password: req.body.password,
+            password: password,
             email: req.body.email,
-            photo_path: ""
+            photo_path: "",
         });
 
-        user.save(function (err, user) {
-            if (err) {
-                return res.status(500).json({
-                    message: 'Error when creating user',
-                    error: err
-                });
-            }
+        var accessToken = jwt.sign({ "user": user._id }, process.env.TOKEN_KEY, { expiresIn: '30m' });
+        user.token = accessToken;
+        await user.save();
 
-            return res.redirect('/users/login');
-        });
+        res.redirect('/users/login');
     },
 
     update: function (req, res) {
@@ -77,9 +85,6 @@ module.exports = {
             user.username = req.body.username ? req.body.username : user.username;
             user.password = req.body.password ? req.body.password : user.password;
             user.email = req.body.email ? req.body.email : user.email;
-            user.questions = req.body.addQ ? user.questions += 1 : user.questions;
-            user.answers = req.body.addA ? user.answers += 1 : user.answers;
-            user.acceptedAnswers = req.body.addAA ? user.acceptedAnswers += 1 : user.acceptedAnswers;
 
             user.save(function (err, user) {
                 if (err) {
@@ -117,34 +122,72 @@ module.exports = {
         res.render('user/login');
     },
 
-    login: function (req, res, next) {
+    login: async function (req, res, next) {
+
+
+        const user = await UserModel.findOne({ username: req.body.username });
+
+
+        if (user && (await bcrypt.compare(req.body.password, user.password))) {
+            const token = jwt.sign({ "user": user._id }, process.env.TOKEN_KEY, { expiresIn: '30m' });
+
+            user.token = token;
+            await user.save();
+
+            req.session.userId = user._id;
+
+            res.redirect('/users/profile');
+        }else{
+            var err = new Error("User \"" + req.body.username + "\" Not Found");
+            err.status = 404;
+            return next(err);
+        }
+
+        /*
         UserModel.authenticate(req.body.username, req.body.password, function (err, user) {
             if (err || !user) {
                 var err = new Error('Wrong username or password');
                 err.status = 401;
                 return next(err);
             }
+            // JWT
+            const refreshToken = jwt.sign({ "user": user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d' });
+            const token = jwt.sign({ "user": user._id }, process.env.TOKEN_KEY, { expiresIn: '30m' });
+
             req.session.userId = user._id;
-            res.redirect('/users/profile');
-        });
+            req.session.refreshToken = refreshToken;
+
+            user.token = token;
+            user.save(function (err, user) {
+                if (err) {
+                    return res.status(500).json({
+                        message: 'Error when creating user',
+                        error: err
+                    });
+                }
+
+                res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+                //res.json({accessToken})
+                res.redirect('/users/profile');
+            });
+        });*/
     },
 
-    profile: function (req, res, next) {
-        UserModel.findById(req.session.userId)
-            .exec(function (error, user) {
-                if (error) {
-                    return next(error);
-                } else {
-                    if (user === null) {
-                        var err = new Error('Not authorized, go back!');
-                        err.status = 400;
-                        return next(err);
-                    } else {
-                        return res.render('user/profile', user);
-                    }
-                }
-            });
+    profile: async function (req, res, next) {
+        try {
+            const user = await UserModel.findById(req.session.userId).exec();
+            if (!user) {
+                var err = new Error('Not authorized, go back!');
+                err.status = 400;
+                return next(err);
+            } else {
+                return res.render('user/profile', user);
+            }
+        } catch (error) {
+            return next(error);
+        }
     },
+    
 
     logout: function (req, res, next) {
         if (req.session) {
