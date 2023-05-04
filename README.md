@@ -1,3 +1,1 @@
 Spletno Programiranje
-
-npm install
