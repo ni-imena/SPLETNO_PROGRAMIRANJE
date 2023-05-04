@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Profil uporabnika</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Posodobi Sliko</h1>
+        <form action="/users/updatepfp" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="image">Izberi sliko:</label>
+                <input type="file" class="form-control-file" name="image" required>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Posodobi</button>
+            </div>
+        </form>
+    </div>
+</body>

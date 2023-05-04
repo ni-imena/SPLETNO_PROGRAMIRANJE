@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Profil uporabnika</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container py-5">
+
+    <div class="row">
+      <div class="col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+        <div class="d-flex align-items-center">
+          <div class="mr-3">
+            <a href="updatephoto">
+              <img src="{{photo_path}}" class="img-fluid rounded-circle" style="height: 100px; width: 100px;">
+            </a>
+          </div>
+          <h1 class="mb-0">{{username}}</h1>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active" id="username-tab" data-toggle="tab" href="#username" role="tab"
+                  aria-controls="username" aria-selected="true">Podatki</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="statistics-tab" data-toggle="tab" href="#statistics" role="tab"
+                  aria-controls="statistics" aria-selected="false">Statistika</a>
+              </li>
+            </ul>
+          </div>
+          <div class="card-body">
+            <div class="tab-content" id="myTabContent">
+              <div class="tab-pane fade show active" id="username" role="tabpanel" aria-labelledby="username-tab">
+                <h2 class="card-title mb-4">E-Mail</h2>
+                <h3 class="card-text">{{email}}</h3>
+              </div>
+              <div class="tab-pane fade" id="statistics" role="tabpanel" aria-labelledby="statistics-tab">
+                <h4></h4>
+                <h4></h4>
+                <h4></h4>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <a href="logout" class="btn btn-danger btn-block">Odjava</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add jQuery and Bootstrap JS libraries -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script>
+    // Initialize tab functionality
+    $(document).ready(function () {
+      $('#myTab a').on('click', function (e) {
+        e.preventDefault()
+        $(this).tab('show')
+      })
+    });
+  </script>
+</body>
+
+
+
+
+
+
+
+
+</html>

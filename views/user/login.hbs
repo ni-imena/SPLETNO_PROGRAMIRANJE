@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Prijava</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      input[type="submit"] {
+        background-color: #007bff;
+        border-color: #007bff;
+      }
+      input[type="submit"]:hover {
+        background-color: #0069d9;
+        border-color: #0062cc;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container py-5">
+      <h1 class="text-center mb-5">Prijava</h1>
+      <form action="login" method="post">
+        <div class="form-group">
+          <input type="text" class="form-control" name="username" placeholder="Uporabniško ime" required>
+        </div>
+        <div class="form-group">
+          <input type="password" class="form-control" name="password" placeholder="Geslo" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Prijava</button>
+      </form>
+    </div>
+  </body>
+</html>
