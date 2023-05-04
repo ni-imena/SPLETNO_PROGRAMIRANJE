@@ -1,12 +1,12 @@
 FROM node:18
 
-WORKDIR /app
+WORKDIR /SPLETNO_PROGRAMIRANJE
 
 COPY package*.json ./
 
 RUN npm install
 
-COPY . /app
+COPY . /SPLETNO_PROGRAMIRANJE
 
 EXPOSE 3000
 
