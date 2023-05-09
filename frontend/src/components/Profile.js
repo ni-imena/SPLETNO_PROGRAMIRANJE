@@ -16,12 +16,12 @@ function Profile(){
     }, []);
 
     return (
-        <>
+        <div className="container">
             {!userContext.user ? <Navigate replace to="/login" /> : ""}
             <h1>User profile</h1>
             <p>Username: {profile.username}</p>
             <p>Email: {profile.email}</p>
-        </>
+        </div>
     );
 }
 

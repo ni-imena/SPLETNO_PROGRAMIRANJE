@@ -2,14 +2,14 @@ import { useState, /*useEffect*/ } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { UserContext } from "./userContext";
 import Header from "./components/Header";
-import Photos from "./components/Photos";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Profile from "./components/Profile";
 import Logout from "./components/Logout";
-import AddPhoto from "./components/AddPhoto";
+import Map from "./components/Map";
+import Runs from "./components/Runs";
+import Home from "./components/Home";
 
-import PhotoDetails from './components/PhotoDetails';
 
 function App() {
   /**
@@ -49,13 +49,13 @@ function App() {
         <div className="App">
           <Header title="Vaja 4"></Header>
           <Routes>
-            <Route path="/" exact element={<Photos />}></Route>
+            <Route path="/" exact element={<Home />}></Route>
             <Route path="/login" exact element={<Login />}></Route>
             <Route path="/register" element={<Register />}></Route>
-            <Route path="/publish" element={<AddPhoto />}></Route>
+            <Route path="/map" element={<Map />}></Route>
             <Route path="/profile" element={<Profile />}></Route>
             <Route path="/logout" element={<Logout />}></Route>
-            <Route path="/photos/:id" element={<PhotoDetails />} />
+            <Route path="/runs" element={<Runs />}></Route>
           </Routes>
         </div>
       </UserContext.Provider>
