@@ -1,4 +1,4 @@
-function Map(){
+function Map() {
     return (
         <div className="container">
             <p>Map</p>

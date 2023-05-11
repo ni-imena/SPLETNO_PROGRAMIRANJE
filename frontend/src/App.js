@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Profile from "./components/Profile";
+import RedirectPage from "./components/RedirectPage";
 import Logout from "./components/Logout";
 import Map from "./components/Map";
 import Runs from "./components/Runs";
@@ -56,6 +57,7 @@ function App() {
             <Route path="/profile" element={<Profile />}></Route>
             <Route path="/logout" element={<Logout />}></Route>
             <Route path="/runs" element={<Runs />}></Route>
+            <Route path="/stravaAuth" element={<RedirectPage />} />
           </Routes>
         </div>
       </UserContext.Provider>
