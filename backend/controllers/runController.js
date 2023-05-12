@@ -53,7 +53,7 @@ module.exports = {
      * runController.create()
      */
     create: function (req, res) {
-
+        console.log(req.body.activity);
         try {
             var activityJson = JSON.parse(req.body.activity);
             var streamJson = JSON.parse(req.body.stream);

@@ -12,4 +12,5 @@ var weatherSchema = new Schema({
 	'date' : Date
 });
 
+
 module.exports = mongoose.model('weather', weatherSchema);
