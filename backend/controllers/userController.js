@@ -1,15 +1,9 @@
 var UserModel = require('../models/userModel.js');
+var RunModel = require('../models/runModel.js');
+const runModel = require('../models/runModel.js');
 
-/**
- * userController.js
- *
- * @description :: Server-side logic for managing users.
- */
 module.exports = {
 
-    /**
-     * userController.list()
-     */
     list: function (req, res) {
         UserModel.find(function (err, users) {
             if (err) {
@@ -23,9 +17,6 @@ module.exports = {
         });
     },
 
-    /**
-     * userController.show()
-     */
     show: function (req, res) {
         var id = req.params.id;
 
@@ -47,9 +38,6 @@ module.exports = {
         });
     },
 
-    /**
-     * userController.create()
-     */
     create: function (req, res) {
         console.log(req.body.username);
         var user = new UserModel({
@@ -104,9 +92,6 @@ module.exports = {
         });
     },
 
-    /**
-     * userController.remove()
-     */
     remove: function (req, res) {
         var id = req.params.id;
 
@@ -160,6 +145,16 @@ module.exports = {
                 }
             });
     },
+
+    runs: function (req, res, next) {
+        var user = req.session.userId;
+        RunModel.find({ userId: user }, function (err, runs) {
+            if (err) {
+                return next(err);
+            }
+            return res.json(runs);
+        });
+    },    
 
     logout: function (req, res, next) {
         if (req.session) {

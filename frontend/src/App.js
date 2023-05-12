@@ -10,6 +10,7 @@ import Logout from "./components/Logout";
 import Map from "./components/Map";
 import Runs from "./components/Runs";
 import Home from "./components/Home";
+import Run from "./components/Run";
 
 
 function App() {
@@ -48,7 +49,7 @@ function App() {
         setUserContext: updateUserData
       }}>
         <div className="App">
-          <Header title="Vaja 4"></Header>
+          <Header title="Virtual Runner"></Header>
           <Routes>
             <Route path="/" exact element={<Home />}></Route>
             <Route path="/login" exact element={<Login />}></Route>
@@ -58,6 +59,7 @@ function App() {
             <Route path="/logout" element={<Logout />}></Route>
             <Route path="/runs" element={<Runs />}></Route>
             <Route path="/stravaAuth" element={<RedirectPage />} />
+            <Route path="/runs/:id" element={<Run />} />
           </Routes>
         </div>
       </UserContext.Provider>

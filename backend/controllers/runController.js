@@ -1,4 +1,6 @@
 var RunModel = require('../models/runModel.js');
+var UserModel = require('../models/userModel.js');
+
 
 /**
  * runController.js
@@ -53,35 +55,55 @@ module.exports = {
     create: function (req, res) {
 
         try {
-            var activity = JSON.parse(req.body.activity);
-            var stream = JSON.parse(req.body.stream);
+            var activityJson = JSON.parse(req.body.activity);
+            var streamJson = JSON.parse(req.body.stream);
         } catch (err) {
             return res.status(400).json({
                 message: 'Invalid JSON in activity field'
             });
         }
 
-        //find a user with the stravaId === req.body.stravaUserId
-        //and get his _id, and thats going to be the userId for a run then.
-
-        //if the user doesn't exist, then return the message that says they need to authorize strava on their profile
-
-        var run = new RunModel({
-            userId: req.body.userId,
-            activity: activity,
-            stream: stream
-        });
-
-        run.save(function (err, run) {
+        RunModel.find({ "activity.id": activityJson.id }, (err, activity) => {
             if (err) {
                 return res.status(500).json({
-                    message: 'Error when creating run',
+                    message: 'Error when getting activity',
                     error: err
                 });
-            }
+            } else if (activity.length === 0) {
+                UserModel.findOne({ stravaId: req.body.stravaUserId }, (err, user) => {
+                    if (err) {
+                        return res.status(500).json({
+                            message: 'Error when getting user',
+                            error: err
+                        });
+                    } else if (!user) {
+                        return res.status(404).json({
+                            message: 'Error when finding a user',
+                            error: err
+                        });
+                    } else {
+                        const run = new RunModel({
+                            userId: user._id,
+                            activity: activityJson,
+                            stream: streamJson
+                        });
+                        run.save(function (err, run) {
+                            if (err) {
+                                return res.status(500).json({
+                                    message: 'Error when creating run',
+                                    error: err
+                                });
+                            }
 
-            return res.status(201).json(run);
-        });
+                            return res.status(201).json(run);
+                        });
+                    }
+                });
+            }
+            else {
+                return res.status(200).json(activity)
+            }
+        })
     },
 
 
