@@ -1,0 +1,30 @@
+name: Docker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: docker build -t pn1:latest .
+
+      - name: Log in to Docker Hub
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push Docker image to Docker Hub
+        run: docker push pn1:latest
+
+      - name: Send webhook to server
+        uses: distributhor/webhook-action@v2.3.2
+        with:
+          url: https://hkdk.events/zcx2eqbKMUcd
+          method: POST
+          body: '{"message": "Docker image has been built and pushed."}'
