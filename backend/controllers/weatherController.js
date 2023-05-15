@@ -7,9 +7,6 @@ var WeatherModel = require('../models/weatherModel.js');
  */
 module.exports = {
 
-    /**
-     * weatherController.list()
-     */
     list: function (req, res) {
         WeatherModel.find(function (err, weathers) {
             if (err) {
@@ -23,13 +20,10 @@ module.exports = {
         });
     },
 
-    /**
-     * weatherController.show()
-     */
     show: function (req, res) {
         var id = req.params.id;
 
-        WeatherModel.findOne({_id: id}, function (err, weather) {
+        WeatherModel.findOne({ _id: id }, function (err, weather) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when getting weather.',
@@ -47,16 +41,23 @@ module.exports = {
         });
     },
 
-    /**
-     * weatherController.create()
-     */
     create: function (req, res) {
+/*
+        WeatherModel.findOneAndRemove({ location: req.body.location }, (err, loc) => {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error when getting location',
+                    error: err
+                });
+            } 
+        })*/
+
         var weather = new WeatherModel({
-			cloudinessId : req.body.cloudinessId,
-			temparature : req.body.temparature,
-			humidity : req.body.humidity,
-			location : req.body.location,
-			date : req.body.date
+            cloudiness: req.body.cloudiness,
+            temperature: req.body.temperature,
+            humidity: req.body.humidity,
+            location: req.body.location,
+            date: Date.now()
         });
 
         weather.save(function (err, weather) {
@@ -71,13 +72,10 @@ module.exports = {
         });
     },
 
-    /**
-     * weatherController.update()
-     */
     update: function (req, res) {
         var id = req.params.id;
 
-        WeatherModel.findOne({_id: id}, function (err, weather) {
+        WeatherModel.findOne({ _id: id }, function (err, weather) {
             if (err) {
                 return res.status(500).json({
                     message: 'Error when getting weather',
@@ -92,11 +90,11 @@ module.exports = {
             }
 
             weather.cloudinessId = req.body.cloudinessId ? req.body.cloudinessId : weather.cloudinessId;
-			weather.temparature = req.body.temparature ? req.body.temparature : weather.temparature;
-			weather.humidity = req.body.humidity ? req.body.humidity : weather.humidity;
-			weather.location = req.body.location ? req.body.location : weather.location;
-			weather.date = req.body.date ? req.body.date : weather.date;
-			
+            weather.temparature = req.body.temparature ? req.body.temparature : weather.temparature;
+            weather.humidity = req.body.humidity ? req.body.humidity : weather.humidity;
+            weather.location = req.body.location ? req.body.location : weather.location;
+            weather.date = req.body.date ? req.body.date : weather.date;
+
             weather.save(function (err, weather) {
                 if (err) {
                     return res.status(500).json({
@@ -110,9 +108,6 @@ module.exports = {
         });
     },
 
-    /**
-     * weatherController.remove()
-     */
     remove: function (req, res) {
         var id = req.params.id;
 

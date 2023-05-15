@@ -25,9 +25,6 @@ module.exports = {
         });
     },
 
-    /**
-     * runController.show()
-     */
     show: function (req, res) {
         var id = req.params.id;
         console.log("showing" + id);
@@ -49,11 +46,8 @@ module.exports = {
         });
     },
 
-    /**
-     * runController.create()
-     */
+
     create: function (req, res) {
-        console.log(req.body.activity);
         try {
             var activityJson = JSON.parse(req.body.activity);
             var streamJson = JSON.parse(req.body.stream);
@@ -107,9 +101,6 @@ module.exports = {
     },
 
 
-    /**
-     * runController.update()
-     */
     update: function (req, res) {
         var id = req.params.id;
 

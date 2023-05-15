@@ -2,11 +2,8 @@ var mongoose = require('mongoose');
 var Schema   = mongoose.Schema;
 
 var weatherSchema = new Schema({
-	'cloudinessId' : {
-	 	type: Schema.Types.ObjectId,
-	 	ref: 'cloudiness'
-	},
-	'temparature' : Number,
+	'cloudiness' : String,
+	'temperature' : Number,
 	'humidity' : Number,
 	'location' : String,
 	'date' : Date
