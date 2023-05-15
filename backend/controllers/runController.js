@@ -30,7 +30,7 @@ module.exports = {
      */
     show: function (req, res) {
         var id = req.params.id;
-
+        console.log("showing" + id);
         RunModel.findOne({ _id: id }, function (err, run) {
             if (err) {
                 return res.status(500).json({
