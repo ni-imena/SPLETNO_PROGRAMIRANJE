@@ -23,7 +23,7 @@ jobs:
         run: docker push pn1:latest
 
       - name: Send webhook to server
-        uses: distributhor/webhook-action@v2.3.2
+        uses: joelwmale/webhook-action@v2.3.2
         with:
           url: https://hkdk.events/zcx2eqbKMUcd
           method: POST
