@@ -1,171 +1,173 @@
-var UserModel = require('../models/userModel.js');
-var RunModel = require('../models/runModel.js');
-const runModel = require('../models/runModel.js');
+var UserModel = require("../models/userModel.js");
+var RunModel = require("../models/runModel.js");
+const runModel = require("../models/runModel.js");
 
 module.exports = {
-
-    list: function (req, res) {
-        UserModel.find(function (err, users) {
-            if (err) {
-                return res.status(500).json({
-                    message: 'Error when getting user.',
-                    error: err
-                });
-            }
-
-            return res.json(users);
+  list: function (req, res) {
+    UserModel.find(function (err, users) {
+      if (err) {
+        return res.status(500).json({
+          message: "Error when getting user.",
+          error: err,
         });
-    },
+      }
 
-    show: function (req, res) {
-        var id = req.params.id;
+      return res.json(users);
+    });
+  },
 
-        UserModel.findOne({ _id: id }, function (err, user) {
-            if (err) {
-                return res.status(500).json({
-                    message: 'Error when getting user.',
-                    error: err
-                });
-            }
+  show: function (req, res) {
+    var id = req.params.id;
 
-            if (!user) {
-                return res.status(404).json({
-                    message: 'No such user'
-                });
-            }
-
-            return res.json(user);
+    UserModel.findOne({ _id: id }, function (err, user) {
+      if (err) {
+        return res.status(500).json({
+          message: "Error when getting user.",
+          error: err,
         });
-    },
+      }
 
-    create: function (req, res) {
-        console.log(req.body.username);
-        var user = new UserModel({
-            username: req.body.username,
-            password: req.body.password,
-            email: req.body.email
+      if (!user) {
+        return res.status(404).json({
+          message: "No such user",
         });
+      }
 
-        user.save(function (err, user) {
-            if (err) {
-                return res.status(500).json({
-                    message: 'Error when creating user',
-                    error: err
-                });
-            }
+      return res.json(user);
+    });
+  },
 
-            return res.status(201).json(user);
-            //return res.redirect('/users/login');
+  create: function (req, res) {
+    console.log(req.body.username);
+    var user = new UserModel({
+      username: req.body.username,
+      password: req.body.password,
+      email: req.body.email,
+    });
+
+    user.save(function (err, user) {
+      if (err) {
+        return res.status(500).json({
+          message: "Error when creating user",
+          error: err,
         });
-    },
+      }
 
-    update: function (req, res) {
-        var id = req.params.id;
-        UserModel.findOne({ _id: id }, function (err, user) {
-            if (err) {
-                return res.status(500).json({
-                    message: 'Error when getting user',
-                    error: err
-                });
-            }
+      return res.status(201).json(user);
+      //return res.redirect('/users/login');
+    });
+  },
 
-            if (!user) {
-                return res.status(404).json({
-                    message: 'No such user'
-                });
-            }
-            user.username = req.body.username ? req.body.username : user.username;
-            user.password = req.body.password ? req.body.password : user.password;
-            user.email = req.body.email ? req.body.email : user.email;
-            user.stravaId = req.body.stravaId ? req.body.stravaId : user.stravaId;
-
-            user.save(function (err, user) {
-                if (err) {
-                    return res.status(500).json({
-                        message: 'Error when updating user.',
-                        error: err
-                    });
-                }
-
-                return res.json(user);
-            });
+  update: function (req, res) {
+    var id = req.params.id;
+    UserModel.findOne({ _id: id }, function (err, user) {
+      if (err) {
+        return res.status(500).json({
+          message: "Error when getting user",
+          error: err,
         });
-    },
+      }
 
-    remove: function (req, res) {
-        var id = req.params.id;
-
-        UserModel.findByIdAndRemove(id, function (err, user) {
-            if (err) {
-                return res.status(500).json({
-                    message: 'Error when deleting the user.',
-                    error: err
-                });
-            }
-
-            return res.status(204).json();
+      if (!user) {
+        return res.status(404).json({
+          message: "No such user",
         });
-    },
+      }
+      user.username = req.body.username ? req.body.username : user.username;
+      user.password = req.body.password ? req.body.password : user.password;
+      user.email = req.body.email ? req.body.email : user.email;
+      user.stravaId = req.body.stravaId ? req.body.stravaId : user.stravaId;
 
-    showRegister: function (req, res) {
-        res.render('user/register');
-    },
-
-    showLogin: function (req, res) {
-        res.render('user/login');
-    },
-
-    login: function (req, res, next) {
-        UserModel.authenticate(req.body.username, req.body.password, function (err, user) {
-            if (err || !user) {
-                var err = new Error('Wrong username or paassword');
-                err.status = 401;
-                return next(err);
-            }
-            req.session.userId = user._id;
-            //res.redirect('/users/profile');
-            return res.json(user);
-        });
-    },
-
-    profile: function (req, res, next) {
-        UserModel.findById(req.session.userId)
-            .exec(function (error, user) {
-                if (error) {
-                    return next(error);
-                } else {
-                    if (user === null) {
-                        var err = new Error('Not authorized, go back!');
-                        err.status = 400;
-                        return next(err);
-                    } else {
-                        //return res.render('user/profile', user);
-                        return res.json(user);
-                    }
-                }
-            });
-    },
-
-    runs: function (req, res, next) {
-        var user = req.session.userId;
-        RunModel.find({ userId: user }, function (err, runs) {
-            if (err) {
-                return next(err);
-            }
-            return res.json(runs);
-        });
-    },    
-
-    logout: function (req, res, next) {
-        if (req.session) {
-            req.session.destroy(function (err) {
-                if (err) {
-                    return next(err);
-                } else {
-                    //return res.redirect('/');
-                    return res.status(201).json({});
-                }
-            });
+      user.save(function (err, user) {
+        if (err) {
+          return res.status(500).json({
+            message: "Error when updating user.",
+            error: err,
+          });
         }
+
+        return res.json(user);
+      });
+    });
+  },
+
+  remove: function (req, res) {
+    var id = req.params.id;
+
+    UserModel.findByIdAndRemove(id, function (err, user) {
+      if (err) {
+        return res.status(500).json({
+          message: "Error when deleting the user.",
+          error: err,
+        });
+      }
+
+      return res.status(204).json();
+    });
+  },
+
+  showRegister: function (req, res) {
+    res.render("user/register");
+  },
+
+  showLogin: function (req, res) {
+    res.render("user/login");
+  },
+
+  login: function (req, res, next) {
+    UserModel.authenticate(
+      req.body.username,
+      req.body.password,
+      function (err, user) {
+        if (err || !user) {
+          var err = new Error("Wrong username or paassword");
+          err.status = 401;
+          return next(err);
+        }
+        req.session.userId = user._id;
+        //res.redirect('/users/profile');
+        return res.json(user);
+      }
+    );
+  },
+
+  profile: function (req, res, next) {
+    UserModel.findById(req.session.userId).exec(function (error, user) {
+      if (error) {
+        return next(error);
+      } else {
+        if (user === null) {
+          var err = new Error("Not authorized, go back!");
+          err.status = 400;
+          return next(err);
+        } else {
+          //return res.render('user/profile', user);
+          return res.json(user);
+        }
+      }
+    });
+  },
+
+  runs: function (req, res, next) {
+    var user = req.session.userId;
+    RunModel.find({ userId: user }, function (err, runs) {
+      if (err) {
+        return next(err);
+      }
+      return res.json(runs);
+    });
+  },
+
+  logout: function (req, res, next) {
+    if (req.session) {
+      req.session.destroy(function (err) {
+        if (err) {
+          return next(err);
+        } else {
+          //return res.redirect('/');
+          return res.status(201).json({});
+        }
+      });
     }
+  },
 };
