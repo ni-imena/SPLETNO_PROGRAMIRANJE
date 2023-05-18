@@ -1,6 +1,6 @@
 var UserModel = require("../models/userModel.js");
 var RunModel = require("../models/runModel.js");
-const runModel = require("../models/runModel.js");
+
 
 module.exports = {
   list: function (req, res) {
@@ -118,15 +118,14 @@ module.exports = {
     UserModel.authenticate(
       req.body.username,
       req.body.password,
-      function (err, user) {
-        if (err || !user) {
-          var err = new Error("Wrong username or paassword");
+      function (err, user, token) {
+        if (err || !user || !token) {
+          var err = new Error("Wrong username or password");
           err.status = 401;
           return next(err);
         }
         req.session.userId = user._id;
-        //res.redirect('/users/profile');
-        return res.json(user);
+        return res.json({ user: user, token: token });
       }
     );
   },

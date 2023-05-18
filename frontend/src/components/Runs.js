@@ -7,17 +7,33 @@ import "./Runs.css";
 function Runs() {
   const userContext = useContext(UserContext);
   const [runs, setRuns] = useState([]);
+  const [tokenExpired, setTokenExpired] = useState(false);
 
   useEffect(function () {
     const getRuns = async function () {
+      const token = localStorage.getItem('token');
       const res = await fetch("http://localhost:3001/users/runs", {
         credentials: "include",
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token
+        }
       });
       const data = await res.json();
-      setRuns(data);
+      if (data.message === "Token expired.") {
+        setTokenExpired(true);
+      } else {
+        setTokenExpired(false);
+        setRuns(data);
+      }
     };
     getRuns();
   }, []);
+
+  if (tokenExpired) {
+    return <Navigate replace to="/logout" />;
+  }
 
   return (
     <div className="container mt-4">

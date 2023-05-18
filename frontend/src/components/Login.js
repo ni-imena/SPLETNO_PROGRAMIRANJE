@@ -10,6 +10,7 @@ function Login() {
 
   async function Login(e) {
     e.preventDefault();
+
     const res = await fetch("http://localhost:3001/users/login", {
       method: "POST",
       credentials: "include",
@@ -19,9 +20,13 @@ function Login() {
         password: password,
       }),
     });
+
     const data = await res.json();
-    if (data._id !== undefined) {
-      userContext.setUserContext(data);
+    const token = data.token;
+    const user = data.user;
+    if (user._id !== undefined) {
+      localStorage.setItem('token', token);
+      userContext.setUserContext(user);
     } else {
       setUsername("");
       setPassword("");
@@ -32,7 +37,7 @@ function Login() {
   return (
     <div className="container">
       <form onSubmit={Login}>
-        {userContext.user ? <Navigate replace to="/" /> : ""}
+        {userContext.user ? <Navigate replace to="/profile" /> : ""}
         <input
           type="text"
           name="username"

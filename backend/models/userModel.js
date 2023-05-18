@@ -1,6 +1,8 @@
 var mongoose = require("mongoose");
 var bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 var Schema = mongoose.Schema;
+
 
 var userSchema = new Schema({
   username: String,
@@ -12,7 +14,6 @@ var userSchema = new Schema({
 userSchema.pre("save", function (next) {
   var user = this;
 
-  // Check if user is new or is being updated
   if (this.isNew) {
     bcrypt.hash(user.password, 10, function (err, hash) {
       if (err) {
@@ -37,7 +38,20 @@ userSchema.statics.authenticate = function (username, password, callback) {
     }
     bcrypt.compare(password, user.password, function (err, result) {
       if (result === true) {
-        return callback(null, user);
+        //console.log("correct password");
+        const payload = {
+          userId: user._id,
+          username: user.username
+        };
+        //console.log(`UserId: ${user._id}`);
+        //console.log(`Username: ${user.username}`);
+        const secretKey = 'your_secret_key';
+        const options = {
+          expiresIn: '10s'
+        };
+        const token = jwt.sign(payload, secretKey, options);
+        //console.log(`Token: ${token}`);
+        return callback(null, user, token);
       } else {
         return callback();
       }

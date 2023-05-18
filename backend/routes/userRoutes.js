@@ -1,6 +1,8 @@
 var express = require("express");
 var router = express.Router();
 var userController = require("../controllers/userController.js");
+//var verifyToken = require("../config/jwtUtils.js");
+
 
 router.get("/", userController.list);
 router.get("/profile", userController.profile);
@@ -16,3 +18,4 @@ router.put("/:id", userController.update);
 router.delete("/:id", userController.remove);
 
 module.exports = router;
+

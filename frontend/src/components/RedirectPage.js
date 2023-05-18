@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../userContext";
 import queryString from "query-string";
@@ -6,8 +6,6 @@ import queryString from "query-string";
 const CLIENT_ID = "105822";
 const CLIENT_SECRET = "e549180fe8992b629caffa80702bd9339759eff7";
 const REDIRECT_URI = "http://localhost:3000/stravaAuth";
-const temp =
-  "https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=activity:read_all";
 
 function RedirectPage() {
   const userContext = useContext(UserContext);
@@ -15,7 +13,7 @@ function RedirectPage() {
   const navigate = useNavigate();
   const [athlete, setAthlete] = useState(null);
 
-  const exchangeCodeForToken = async () => {
+  const exchangeCodeForToken = useCallback(async () => {
     const queryParams = queryString.parse(window.location.search);
     const code = queryParams.code;
     const response = await fetch("https://www.strava.com/oauth/token", {
@@ -33,17 +31,17 @@ function RedirectPage() {
     });
     const data = await response.json();
     setAccessToken(data.access_token);
-  };
+  }, []);
 
-  const getAthlete = async function () {
+  const getAthlete = useCallback(async function () {
     const res = await fetch("https://www.strava.com/api/v3/athlete", {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     const data = await res.json();
     setAthlete(data.id);
-  };
+  }, [accessToken]);
 
-  const saveAthleteId = async function () {
+  const saveAthleteId = useCallback(async function () {
     const res = await fetch(
       `http://localhost:3001/users/${userContext.user._id}`,
       {
@@ -56,7 +54,7 @@ function RedirectPage() {
       }
     );
     await res.json();
-  };
+  }, [userContext.user._id, athlete]);
 
   useEffect(() => {
     const queryParams = queryString.parse(window.location.search);
@@ -67,20 +65,21 @@ function RedirectPage() {
     } else {
       navigate("/");
     }
-  }, [navigate]);
+  }, [navigate, exchangeCodeForToken]);
 
   useEffect(() => {
     if (accessToken !== null) {
       getAthlete();
     }
-  }, [accessToken]);
+  }, [accessToken, getAthlete]);
 
   useEffect(() => {
     if (athlete !== null) {
       saveAthleteId();
       navigate("/profile");
     }
-  }, [athlete]);
+  }, [athlete, navigate, saveAthleteId]);
+
 
   return null;
 }
