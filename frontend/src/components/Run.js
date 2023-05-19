@@ -9,8 +9,8 @@ import './Run.css';
 function Run() {
   const userContext = useContext(UserContext);
   const { id } = useParams();
-  const [/*run, */setRun] = useState(null);
-  const [/*activity, */setActivity] = useState(null);
+  const [run, setRun] = useState(null);
+  const [activity, setActivity] = useState(null);
   const [stream, setStream] = useState(null);
   const [isPlotting, setIsPlotting] = useState(false);
   const mapRef = useRef(null);
@@ -24,7 +24,6 @@ function Run() {
           'Authorization': `Bearer ${userContext.user._id}`
         };
       }
-      console.log("fetching");
       const res = await fetch(`http://localhost:3001/runs/${id}`, {
         headers: headers
       });

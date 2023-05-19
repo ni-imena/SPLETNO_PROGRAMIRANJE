@@ -1,7 +1,6 @@
 var UserModel = require("../models/userModel.js");
 var RunModel = require("../models/runModel.js");
 
-
 module.exports = {
   list: function (req, res) {
     UserModel.find(function (err, users) {
@@ -38,7 +37,6 @@ module.exports = {
   },
 
   create: function (req, res) {
-    console.log(req.body.username);
     var user = new UserModel({
       username: req.body.username,
       password: req.body.password,
@@ -106,13 +104,6 @@ module.exports = {
     });
   },
 
-  showRegister: function (req, res) {
-    res.render("user/register");
-  },
-
-  showLogin: function (req, res) {
-    res.render("user/login");
-  },
 
   login: function (req, res, next) {
     UserModel.authenticate(
@@ -135,13 +126,17 @@ module.exports = {
       if (error) {
         return next(error);
       } else {
+        //console.log(user);
         if (user === null) {
           var err = new Error("Not authorized, go back!");
           err.status = 400;
           return next(err);
         } else {
-          //return res.render('user/profile', user);
-          return res.json(user);
+          var responseData = {
+            user: user,
+            accessToken: req.newAccessToken
+          };
+          return res.json(responseData);
         }
       }
     });
@@ -153,7 +148,11 @@ module.exports = {
       if (err) {
         return next(err);
       }
-      return res.json(runs);
+      var responseData = {
+        runs: runs,
+        accessToken: req.newAccessToken
+      };
+      return res.json(responseData);
     });
   },
 

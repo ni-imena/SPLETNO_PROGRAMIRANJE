@@ -2,6 +2,7 @@ var mongoose = require("mongoose");
 var bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 var Schema = mongoose.Schema;
+const { makeAccessToken, makeRefreshToken } = require("../config/jwtUtils.js");
 
 
 var userSchema = new Schema({
@@ -10,6 +11,41 @@ var userSchema = new Schema({
   email: String,
   stravaId: String,
 });
+
+//iskanje tekov okoli uporabnika
+/* geospatial queries
+
+const mongoose = require('mongoose');
+
+const locationSchema = new mongoose.Schema({
+  name: String,
+  coordinates: {
+    type: [Number],
+    index: '2dsphere' // Enable the 2dsphere index for geospatial queries
+  }
+});
+
+const Location = mongoose.model('Location', locationSchema);
+
+
+*/
+/* poizvedba
+
+// Find locations within a certain radius
+const { latitude, longitude, radius } = req.query;
+const coordinates = [parseFloat(longitude), parseFloat(latitude)];
+const locations = await Location.find({
+  coordinates: {
+    $near: {
+      $geometry: {
+        type: 'Point',
+        coordinates
+      },
+      $maxDistance: radius
+    }
+  }
+});
+*/
 
 userSchema.pre("save", function (next) {
   var user = this;
@@ -38,19 +74,8 @@ userSchema.statics.authenticate = function (username, password, callback) {
     }
     bcrypt.compare(password, user.password, function (err, result) {
       if (result === true) {
-        //console.log("correct password");
-        const payload = {
-          userId: user._id,
-          username: user.username
-        };
-        //console.log(`UserId: ${user._id}`);
-        //console.log(`Username: ${user.username}`);
-        const secretKey = 'your_secret_key';
-        const options = {
-          expiresIn: '10s'
-        };
-        const token = jwt.sign(payload, secretKey, options);
-        //console.log(`Token: ${token}`);
+        const token = makeAccessToken(user._id);
+        makeRefreshToken(user._id);
         return callback(null, user, token);
       } else {
         return callback();

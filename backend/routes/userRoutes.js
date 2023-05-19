@@ -1,12 +1,12 @@
 var express = require("express");
 var router = express.Router();
 var userController = require("../controllers/userController.js");
-//var verifyToken = require("../config/jwtUtils.js");
+const { verifyToken } = require("../config/jwtUtils.js");
 
 
 router.get("/", userController.list);
-router.get("/profile", userController.profile);
-router.get("/runs", userController.runs);
+router.get("/profile", verifyToken, userController.profile);
+router.get("/runs", verifyToken, userController.runs);
 router.get("/logout", userController.logout);
 router.get("/:id", userController.show);
 

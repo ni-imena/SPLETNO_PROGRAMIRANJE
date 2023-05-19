@@ -23,11 +23,15 @@ function Profile() {
         }
       });
       const data = await res.json();
+      if (data.accessToken) {
+        localStorage.setItem('token', data.accessToken);
+      }
       if (data.message === "Token expired.") {
         setTokenExpired(true);
-      } else {
+      }
+      else {
         setTokenExpired(false);
-        setProfile(data);
+        setProfile(data.user);
       }
       setLoading(false);
     };
