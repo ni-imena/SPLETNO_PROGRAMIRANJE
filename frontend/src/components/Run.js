@@ -1,12 +1,10 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { UserContext } from '../userContext';
 import { useParams } from 'react-router-dom';
-import { MapContainer, TileLayer, CircleMarker/*, Marker, Popup */ } from 'react-leaflet';
-import PlotPoints from "./PlotPoints";
+import { MapContainer, TileLayer, CircleMarker } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet-css';
 import './Run.css';
-import * as d3 from 'd3';
 
 function Run() {
   const userContext = useContext(UserContext);
@@ -15,10 +13,18 @@ function Run() {
   const [activity, setActivity] = useState(null);
   const [stream, setStream] = useState(null);
   const [isPlotting, setIsPlotting] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [speed, setSpeed] = useState(1);
+  const [current, setCurrent] = useState(0);
+  const [isCentered, setIsCentered] = useState(false);
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+
   const mapRef = useRef(null);
-  const animationFrameRef = useRef(null); // Ref to store the animation frame request ID
-  const [currentPoint, setCurrentPoint] = useState(null);
-  const [speedup, setSpeedup] = useState(1);
+  const polylineRef = useRef(null);
+  const runnerMarkerRef = useRef(null);
+  const iRef = useRef(0);
+  const animationFrameRef = useRef(null);
+
 
   useEffect(() => {
     const getRun = async () => {
@@ -37,7 +43,6 @@ function Run() {
       setStream(data.stream);
     };
     getRun();
-
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -45,30 +50,185 @@ function Run() {
     };
   }, [id, userContext, setActivity, setRun]);
 
-  const handlePlayClick = () => {
-    if (!isPlotting) {
-      setIsPlotting(true);
+  const drawPlotPoint = () => {
+    setIsAnimationComplete(false);
+    const currentIndex = iRef.current;
+    const nextIndex = currentIndex + 1;
+    const currentPoint = stream.latlng.data[currentIndex];
+    const nextPoint = stream.latlng.data[nextIndex];
+
+    if (!currentPoint || !nextPoint) {
+      return;
+    }
+
+    const [currentLat, currentLng] = currentPoint;
+    const [nextLat, nextLng] = nextPoint;
+    const distance = getDistance(currentLat, currentLng, nextLat, nextLng);
+    const distanceInSeconds = stream.time.data[nextIndex] - stream.time.data[currentIndex];
+
+    if (distance === 0) {
+      handleZeroDistance(nextLat, nextLng);
+    } else {
+      animateMovement(currentLat, currentLng, nextLat, nextLng, distanceInSeconds);
     }
   };
 
-  const handleRestartClicked = () => {
+  const handleZeroDistance = (nextLat, nextLng) => {
+    polylineRef.current.addLatLng([nextLat, nextLng]);
+    iRef.current += 1;
 
-  };
-
-  const handleStopClicked = () => {
-    if (isPlotting) {
+    if (iRef.current < stream.latlng.data.length) {
+      animationFrameRef.current = requestAnimationFrame(drawPlotPoint);
+    } else {
       setIsPlotting(false);
     }
   };
 
-  const handleForwardClicked = () => {
-    speedup === -1 || speedup === 1 ? setSpeedup(2) :
-      speedup < 1 ? setSpeedup(speedup / 2) : setSpeedup(speedup * 2);
+  const animateMovement = (currentLat, currentLng, nextLat, nextLng, distanceInSeconds) => {
+    const rawDuration = distanceInSeconds * 1000; // Convert to milliseconds
+    const duration = rawDuration / speed;
+    const totalFrames = duration / (1000 / 60); // Assuming 60 frames per second
+    let frame = 0;
+
+    const drawFrame = () => {
+      const progress = frame / totalFrames;
+      const lat = currentLat + (nextLat - currentLat) * progress;
+      const lng = currentLng + (nextLng - currentLng) * progress;
+      polylineRef.current.addLatLng([lat, lng]);
+
+      if (isCentered) {
+        mapRef.current.panTo([lat, lng], 18);
+      }
+
+      updateRunnerMarker(lat, lng);
+      frame++;
+
+      if (frame <= totalFrames) {
+        animationFrameRef.current = requestAnimationFrame(drawFrame);
+      } else {
+        handleAnimationComplete();
+      }
+    };
+
+    drawFrame();
   };
 
-  const handleBackClicked = () => {
-    speedup === 1 ? setSpeedup(-2) :
-      speedup > 1 ? setSpeedup(speedup / 2) : setSpeedup(speedup * 2);
+  const updateRunnerMarker = (lat, lng) => {
+    if (runnerMarkerRef.current) {
+      mapRef.current.removeLayer(runnerMarkerRef.current);
+    }
+
+    const runningIcon = L.icon({
+      iconUrl: 'https://use.fontawesome.com/releases/v5.8.1/svgs/solid/running.svg',
+      iconSize: [28, 75],
+      iconAnchor: [22, 54],
+      popupAnchor: [-3, -76],
+    });
+
+    runnerMarkerRef.current = L.marker([lat, lng], {
+      icon: runningIcon,
+    }).addTo(mapRef.current);
+  };
+
+  const handleAnimationComplete = () => {
+    setCurrent(iRef.current);
+    iRef.current += 1;
+    if (iRef.current < stream.latlng.data.length) {
+      setIsAnimationComplete(true);
+      animationFrameRef.current = requestAnimationFrame(drawPlotPoint);
+    } else {
+      setIsPlotting(false);
+    }
+  };
+
+
+  const getDistance = (lat1, lng1, lat2, lng2) => {
+    if (lat1 === lat2 && lng1 === lng2) {
+      return 0;
+    }
+
+    const deg2rad = (deg) => {
+      return deg * (Math.PI / 180);
+    };
+
+    const R = 6371; // Radius of the Earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLng = deg2rad(lng2 - lng1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) *
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return distance;
+  };
+
+  const startPlotting = () => {
+    if (!isPlotting) {
+      setIsPlotting(true);
+      iRef.current = 0;
+      mapRef.current.flyTo(stream.latlng.data[0], 18);
+      polylineRef.current = L.polyline([], { color: 'red', weight: 3 }).addTo(mapRef.current);
+      drawPlotPoint();
+    }
+  };
+
+  const handleRunStartClick = () => { startPlotting(); };
+
+  const handleRunPauseClick = () => {
+    if (isPlotting) {
+      setIsPaused(!isPaused);
+      if (!isPaused) {
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
+      } else {
+        drawPlotPoint();
+      }
+    }
+  };
+
+  const handleRunSpeedClick = (direction) => {
+    if (direction === 'low') {
+      setSpeed(prevSpeed => prevSpeed / 2);
+    } else if (direction === 'high') {
+      setSpeed(prevSpeed => prevSpeed * 2);
+    }
+  };
+
+  const formatTime = (timeInSeconds) => {
+    const hours = Math.floor(timeInSeconds / 3600);
+    const minutes = Math.floor((timeInSeconds % 3600) / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+
+    const formattedHours = String(hours).padStart(2, '0');
+    const formattedMinutes = String(minutes).padStart(2, '0');
+    const formattedSeconds = String(seconds).padStart(2, '0');
+
+    if (hours > 0) {
+      return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+    } else {
+      return `${formattedMinutes}:${formattedSeconds}`;
+    }
+  };
+
+  useEffect(() => {
+    if (isPlotting && !isPaused) {
+      startPlotting();
+    }
+  }, [isPlotting, isPaused,]);
+
+  useEffect(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      drawPlotPoint();
+    }
+  }, [speed, isCentered]);
+
+  const toggleCentering = () => {
+    setIsCentered(prevState => !prevState);
   };
 
   const calculateCenter = data => { // gets the center point of the run
@@ -86,91 +246,29 @@ function Run() {
     return [centerLat, centerLng];
   }
 
-  const velocityToPace = velocity => { // convert m/s to pace in mm:ss format
-    const pace = 60 / (velocity * 3.6);
-    const minutes = Math.floor(pace);
-    const seconds = Math.round((pace - minutes) * 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  }
-
-  const formatTime = seconds => { // convert time from seconds to hh:mm:ss
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
-
-    let formattedTime = "";
-
-    if (hours > 0) {
-      formattedTime += hours.toString().padStart(2, "0") + ":";
-    }
-
-    formattedTime += minutes.toString().padStart(2, "0") + ":" +
-      remainingSeconds.toString().padStart(2, "0");
-
-    return formattedTime;
-  }
-
-  function drawGraph(data) {
-    const margin = { top: 20, right: 20, bottom: 30, left: 50 };
-    const width = 600 - margin.left - margin.right;
-    const height = 230 - margin.top - margin.bottom;
-
-    const svg = d3.select(".statistics").append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    const x = d3.scaleLinear().range([0, width]);
-    const y = d3.scaleLinear().range([height, 0]);
-
-    const line = d3.line()
-      .x((d, i) => x(i))
-      .y(d => y(d));
-
-    x.domain([0, data.length - 1]);
-    y.domain([d3.min(data), d3.max(data)]);
-
-    svg.append("path")
-      .datum(data)
-      .attr("class", "line")
-      .attr("d", line);
-
-    svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
-
-    svg.append("g")
-      .call(d3.axisLeft(y));
-  }
-
   return (
     <div>
       <div>
         {stream && (
-          <MapContainer ref={mapRef} className="map" id="map" center={calculateCenter(stream.latlng.data)} zoom={15}>
+          <MapContainer ref={mapRef} className="map" id="map" center={calculateCenter(stream.latlng.data)} zoom={15} doubleClickZoom={false}>
             <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>" />
             <CircleMarker center={calculateCenter(stream.latlng.data)} radius={5} color="blue" fillColor="blue" fillOpacity={1} />
-            {isPlotting &&
-              <PlotPoints stream={stream} activity={activity} speedup={speedup} mapRef={mapRef} isPlotting={isPlotting} />
-            }
+            <div className='runData'>
+              <div>
+                <div>Time:</div>
+              </div>
+              <div>
+                {current && stream.time ? (<div>{formatTime(stream.time.data[current])}</div>) : <div></div>}
+              </div>
+            </div>
             <div className="controls">
-              <button className="icon" onClick={handlePlayClick}>
-                <i className="fas fa-play"></i>
-              </button>
-              <button className="icon" >
-                <i className="fas fa-redo"></i>
-              </button>
-              <span className="speedup">{speedup}x</span>
-              <button className="icon" onClick={handleBackClicked}>
-                <i className="fas fa-step-backward"></i>
-              </button>
-              <button className="icon" onClick={handleStopClicked}>
-                <i className="fas fa-stop"></i>
-              </button>
-              <button className="icon" onClick={handleForwardClicked}>
-                <i className="fas fa-step-forward"></i>
-              </button>
+              <button className="icon" onClick={handleRunStartClick}><i className="fas fa-play"></i></button>
+              <button className="icon" onClick={toggleCentering}><i className="fas fa-arrows-alt"></i></button>
+              {/*<button className="icon"><i className="fas fa-redo"></i></button>*/}
+              <span className="speedup">{speed}x</span>
+              <button className="icon" onClick={() => handleRunSpeedClick('low')}><i className="fas fa-step-backward"></i></button>
+              <button className="icon" onClick={handleRunPauseClick}><i className={isPaused ? "fas fa-play" : "fas fa-pause"}></i></button>
+              <button className="icon" onClick={() => handleRunSpeedClick('high')}><i className="fas fa-step-forward"></i></button>
             </div>
           </MapContainer>
         )}
@@ -178,9 +276,5 @@ function Run() {
     </div>
   );
 }
-
-//TODO popravi start/stop/changespeed
-//TODO grafi
-//TODO restart
 
 export default Run;

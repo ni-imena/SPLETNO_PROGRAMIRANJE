@@ -114,7 +114,7 @@ function Runs() {
             >
               <div className="row align-items-center">
                 <div className="col-1"><span className="badge bg-secondary">{run.activity.type}</span></div>
-                <div className="col-3"><h5 className="mb-0 truncate-text">{run.activity.name}</h5></div>
+                <div className="col-3"><h5 className="mb-0 truncate-text">{run._id}</h5></div>
                 <div className="col-2"><small className="mb-0 truncate-text">{moment(run.activity.start_date).format("D/M/YYYY")}</small></div>
                 <div className="col-2">{formatTime(run.activity.elapsed_time)}</div>
                 <div className="col-2"><span className="mb-0 truncate-text">{`${(run.activity.distance / 1000).toFixed(2)} km`}</span></div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 function Register() {
   const [username, setUsername] = useState([]);
@@ -55,8 +56,8 @@ function Register() {
           </div>
 
           <div className="submit-container">
-            <div className="button-container" style={{ marginRight: 0, justifyContent: 'center'}}>
-              <input type="submit" name="submit" value="Register" style={{ width: '50%'}}/>
+            <div className="button-container" style={{ marginRight: 0, justifyContent: 'center' }}>
+              <input type="submit" name="submit" value="Register" style={{ width: '50%' }} />
             </div>
           </div>
 
@@ -67,13 +68,27 @@ function Register() {
           </div>
 
           <div className="outside-group">
-              <button className="form-button" style={{ marginRight: '15px' }}>
-                <i class="fa-brands fa-google" style={{ fontSize: '24px', marginRight: '5px' }}></i>
-                Sign up with Google</button>
-              <button className="form-button" style={{ marginLeft: '15px' }}>
-                <i class="fa-brands fa-facebook" style={{ fontSize: "24px", marginRight: '5px' }}></i>
-                Sign up with Facebook
-              </button>
+            <button className="form-button" style={{ marginRight: '15px' }}>
+              <i class="fa-brands fa-google" style={{ fontSize: '24px', marginRight: '5px' }}></i>
+              Sign up with Google</button>
+            <button className="form-button" style={{ marginLeft: '15px' }}>
+              <i class="fa-brands fa-facebook" style={{ fontSize: "24px", marginRight: '5px' }}></i>
+              Sign up with Facebook
+            </button>
+          </div>
+
+
+          <div className="or-divider">
+            <span className="line"></span>
+          </div>
+
+          <div className="register-group">
+            <h4>Already have an account?</h4>
+            <div className="register-row">
+              <Link to="/login">
+                <button className="register-button">LOG IN</button>
+              </Link>
+            </div>
           </div>
         </form>
       </div>
