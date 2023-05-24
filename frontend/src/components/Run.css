@@ -56,13 +56,23 @@
 }
 
 .statistics svg:nth-of-type(1) path {
-stroke: red;
+    stroke: red;
 }
 
 .statistics svg:nth-of-type(2) path {
-stroke: blue;
+    stroke: blue;
 }
 
 .statistics svg:nth-of-type(3) path {
-stroke: green;
+    stroke: green;
+}
+
+.runner-icon {
+    position: relative;
+}
+  
+.runner-animation {
+    background-image: url('runner.gif');
+    width: 100%;
+    height: 100%;
 }

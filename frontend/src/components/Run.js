@@ -15,7 +15,7 @@ function Run() {
   const [isPlotting, setIsPlotting] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [speed, setSpeed] = useState(1);
-  const [current, setCurrent] = useState(0);
+  const [current, setCurrent] = useState(1);
   const [isCentered, setIsCentered] = useState(false);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
 
@@ -113,18 +113,35 @@ function Run() {
     drawFrame();
   };
 
+  // const updateRunnerMarker = (lat, lng) => {
+  //   if (runnerMarkerRef.current) {
+  //     mapRef.current.removeLayer(runnerMarkerRef.current);
+  //   }
+
+  //   const runningIcon = L.icon({
+  //     iconUrl: 'https://use.fontawesome.com/releases/v5.8.1/svgs/solid/running.svg',
+  //     iconSize: [28, 75],
+  //     iconAnchor: [22, 54],
+  //     popupAnchor: [-3, -76],
+  //   });
+
+  //   runnerMarkerRef.current = L.marker([lat, lng], {
+  //     icon: runningIcon,
+  //   }).addTo(mapRef.current);
+  // };
+
   const updateRunnerMarker = (lat, lng) => {
     if (runnerMarkerRef.current) {
       mapRef.current.removeLayer(runnerMarkerRef.current);
     }
-
-    const runningIcon = L.icon({
-      iconUrl: 'https://use.fontawesome.com/releases/v5.8.1/svgs/solid/running.svg',
-      iconSize: [28, 75],
-      iconAnchor: [22, 54],
+    const runningIcon = L.divIcon({
+      className: 'runner-icon',
+      html: '<div class="runner-animation"></div>',
+      iconSize: [57, 67],
+      iconAnchor: [28, 40],
       popupAnchor: [-3, -76],
     });
-
+      
     runnerMarkerRef.current = L.marker([lat, lng], {
       icon: runningIcon,
     }).addTo(mapRef.current);
@@ -168,7 +185,7 @@ function Run() {
   const startPlotting = () => {
     if (!isPlotting) {
       setIsPlotting(true);
-      iRef.current = 0;
+      iRef.current = 1;
       mapRef.current.flyTo(stream.latlng.data[0], 18);
       polylineRef.current = L.polyline([], { color: 'red', weight: 3 }).addTo(mapRef.current);
       drawPlotPoint();
@@ -197,6 +214,13 @@ function Run() {
       setSpeed(prevSpeed => prevSpeed * 2);
     }
   };
+
+  const velocityToPace = velocity => { // convert m/s to pace in mm:ss format
+    const pace = 60 / (velocity * 3.6);
+    const minutes = Math.floor(pace);
+    const seconds = Math.round((pace - minutes) * 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  }
 
   const formatTime = (timeInSeconds) => {
     const hours = Math.floor(timeInSeconds / 3600);
@@ -252,22 +276,42 @@ function Run() {
         {stream && (
           <MapContainer ref={mapRef} className="map" id="map" center={calculateCenter(stream.latlng.data)} zoom={15} doubleClickZoom={false}>
             <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>" />
-            <CircleMarker center={calculateCenter(stream.latlng.data)} radius={5} color="blue" fillColor="blue" fillOpacity={1} />
-            <div className='runData'>
-              <div>
-                <div>Time:</div>
+            {/* <CircleMarker center={calculateCenter(stream.latlng.data)} radius={5} color="blue" fillColor="blue" fillOpacity={1} /> */}
+            {isPlotting && (
+              <div className='runData'>
+                <div>
+                  <div>Distance:</div>
+                  <div>Pace:</div>
+                  <div>Speed:</div>
+                  <div>Heart rate:</div>
+                  <div>Cadence:</div>
+                  <div>Elevation:</div>
+                  <div>Calories: </div>
+                  <div>Time:</div>
+                </div>
+                <div>
+                  {stream.distance ? (<div>{(stream.distance.data[current] / 1000).toFixed(2)} km</div>) : <div></div>}
+                  {stream.velocity_smooth ? (<div>{velocityToPace(stream.velocity_smooth.data[current])}</div>) : <div></div>}
+                  {stream.velocity_smooth ? (<div>{(stream.velocity_smooth.data[current] * 3.6).toFixed(2)} km/h</div>) : <div></div>}
+                  {stream.heartrate ? (<div> {stream.heartrate.data[current]} bpm</div>) : <div></div>}
+                  {stream.cadence ? (<div>{stream.cadence.data[current]} </div>) : <div></div>}
+                  {stream.altitude ? (<div>{stream.altitude.data[current]}</div>) : <div></div>}
+                  <div>{Math.round(activity.calories * current / stream.distance.data.length)} kcal</div>
+                  {stream.time ? (<div>{formatTime(stream.time.data[current])}</div>) : <div></div>}
+                </div>
+                {current}
               </div>
-              <div>
-                {current && stream.time ? (<div>{formatTime(stream.time.data[current])}</div>) : <div></div>}
-              </div>
-            </div>
+            )}
             <div className="controls">
-              <button className="icon" onClick={handleRunStartClick}><i className="fas fa-play"></i></button>
               <button className="icon" onClick={toggleCentering}><i className="fas fa-arrows-alt"></i></button>
-              {/*<button className="icon"><i className="fas fa-redo"></i></button>*/}
+              <button className="icon"><i className="fas fa-redo"></i></button>
               <span className="speedup">{speed}x</span>
               <button className="icon" onClick={() => handleRunSpeedClick('low')}><i className="fas fa-step-backward"></i></button>
-              <button className="icon" onClick={handleRunPauseClick}><i className={isPaused ? "fas fa-play" : "fas fa-pause"}></i></button>
+              {isPlotting
+                ? (<button className="icon" onClick={handleRunPauseClick}><i className={isPaused ? "fas fa-play" : "fas fa-pause"}></i></button>)
+                : (<button className="icon" onClick={handleRunStartClick}><i className="fas fa-play"></i></button>)
+              }
+
               <button className="icon" onClick={() => handleRunSpeedClick('high')}><i className="fas fa-step-forward"></i></button>
             </div>
           </MapContainer>
