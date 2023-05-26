@@ -3,7 +3,9 @@
     height: calc(100vh - 56px);
 }
 
-.runData, .controls {
+.runData,
+.controls,
+.addRunPopup {
     position: fixed;
     left: 20px;
     background: white;
@@ -30,8 +32,24 @@
     font-size: 1rem;
 }
 
-.runData>div:first-child{
+.runData>div:first-child {
     font-weight: bold;
+}
+
+.addRunPopup {
+    bottom: 20px;
+    left: 270px;
+    width: auto;
+    max-height: fit-content;
+}
+
+.addRunPopup button {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 0px 10px
 }
 
 .controls {
@@ -41,7 +59,8 @@
     justify-content: space-evenly;
 }
 
-.controls button, .controls span {
+.controls button,
+.controls span {
     background: none;
     border: none;
     font-size: 1.8rem;
@@ -50,13 +69,9 @@
     padding: 0px 10px
 }
 
-.controls span{
-    border: 1px;
-}
-
-.line { 
-    fill: none; 
-    stroke-width: 2px; 
+.line {
+    fill: none;
+    stroke-width: 2px;
 }
 
 .statistics svg:nth-of-type(1) path {
@@ -74,7 +89,7 @@
 .runner-icon {
     position: relative;
 }
-  
+
 .runner-animation {
     background-image: url('Icons/cyan.png');
     transform: scale(0.08);

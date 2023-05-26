@@ -3,7 +3,9 @@ var router = express.Router();
 var runController = require("../controllers/runController.js");
 
 router.get("/", runController.list);
+router.get("/nearby/:id", runController.nearbyRuns);
 router.get("/:id", runController.show);
+
 
 router.post("/", runController.create);
 

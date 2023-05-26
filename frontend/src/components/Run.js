@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { UserContext } from '../userContext';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { MapContainer, TileLayer, CircleMarker } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet-css';
@@ -18,13 +18,15 @@ function Run() {
   const [current, setCurrent] = useState(1);
   const [isCentered, setIsCentered] = useState(false);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const [runs, setRuns] = useState([]);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
 
   const mapRef = useRef(null);
   const polylineRef = useRef(null);
   const runnerMarkerRef = useRef(null);
   const iRef = useRef(0);
   const animationFrameRef = useRef(null);
-
 
   useEffect(() => {
     const getRun = async () => {
@@ -49,6 +51,16 @@ function Run() {
       }
     };
   }, [id, userContext, setActivity, setRun]);
+
+  useEffect(function () {
+    const fetchRuns = async function () {
+      const res = await fetch(`http://localhost:3001/runs/nearby/${id}`);
+      const data = await res.json();
+      console.log(data.runs);
+      setRuns(data.runs);
+    };
+    fetchRuns();
+  }, [userContext]);
 
   const drawPlotPoint = () => {
     setIsAnimationComplete(false);
@@ -112,23 +124,6 @@ function Run() {
 
     drawFrame();
   };
-
-  // const updateRunnerMarker = (lat, lng) => {
-  //   if (runnerMarkerRef.current) {
-  //     mapRef.current.removeLayer(runnerMarkerRef.current);
-  //   }
-
-  //   const runningIcon = L.icon({
-  //     iconUrl: 'https://use.fontawesome.com/releases/v5.8.1/svgs/solid/running.svg',
-  //     iconSize: [28, 75],
-  //     iconAnchor: [22, 54],
-  //     popupAnchor: [-3, -76],
-  //   });
-
-  //   runnerMarkerRef.current = L.marker([lat, lng], {
-  //     icon: runningIcon,
-  //   }).addTo(mapRef.current);
-  // };
 
   const updateRunnerMarker = (lat, lng) => {
     if (runnerMarkerRef.current) {
@@ -278,7 +273,6 @@ function Run() {
   }
 
   const handleRunRestartClick = () => {
-    //setIsPlotting(false);
     setIsPaused(false);
     setSpeed(1);
     setCurrent(1);
@@ -305,34 +299,38 @@ function Run() {
     startPlotting();
   };
 
+  const handlePopup = () => {
+    setIsPopupOpen(!isPopupOpen);
+  };
+
   return (
     <div>
       <div>
-        {stream && stream.latlng && (
+        {stream && runs && (
           <MapContainer ref={mapRef} className="map" id="map" center={calculateCenter(stream.latlng.data)} zoom={15} doubleClickZoom={false}>
             <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>" />
             {/* <CircleMarker center={calculateCenter(stream.latlng.data)} radius={5} color="blue" fillColor="blue" fillOpacity={1} /> */}
             {isPlotting && (
               <div className='runData'>
                 <div>
-                  <div>Distance:</div>
-                  <div>Pace:</div>
-                  <div>Speed:</div>
-                  <div>Heart rate:</div>
-                  <div>Cadence:</div>
-                  <div>Elevation:</div>
+                  {stream.distance ? (<div>Distance:</div>) : null}
+                  {stream.velocity_smooth ? (<div>Pace:</div>) : null}
+                  {stream.velocity_smooth ? (<div>Speed:</div>) : null}
+                  {stream.heartrate ? (<div>Heart rate:</div>) : null}
+                  {stream.cadence ? (<div>Cadence:</div>) : null}
+                  {stream.altitude ? (<div>Elevation:</div>) : null}
                   <div>Calories: </div>
-                  <div>Time:</div>
+                  {stream.time ? (<div>Time:</div>) : null}
                 </div>
                 <div>
-                  {stream.distance ? (<div>{(stream.distance.data[current] / 1000).toFixed(2)} km</div>) : <div></div>}
-                  {stream.velocity_smooth ? (<div>{velocityToPace(stream.velocity_smooth.data[current])}</div>) : <div></div>}
-                  {stream.velocity_smooth ? (<div>{(stream.velocity_smooth.data[current] * 3.6).toFixed(2)} km/h</div>) : <div></div>}
-                  {stream.heartrate ? (<div> {stream.heartrate.data[current]} bpm</div>) : <div></div>}
-                  {stream.cadence ? (<div>{stream.cadence.data[current]} </div>) : <div></div>}
-                  {stream.altitude ? (<div>{stream.altitude.data[current]}</div>) : <div></div>}
+                  {stream.distance ? (<div>{(stream.distance.data[current] / 1000).toFixed(2)} km</div>) : null}
+                  {stream.velocity_smooth ? (<div>{velocityToPace(stream.velocity_smooth.data[current])}</div>) : null}
+                  {stream.velocity_smooth ? (<div>{(stream.velocity_smooth.data[current] * 3.6).toFixed(2)} km/h</div>) : null}
+                  {stream.heartrate ? (<div> {stream.heartrate.data[current]} bpm</div>) : null}
+                  {stream.cadence ? (<div>{stream.cadence.data[current]} </div>) : null}
+                  {stream.altitude ? (<div>{stream.altitude.data[current]}</div>) : null}
                   <div>{Math.round(activity.calories * current / stream.distance.data.length)} kcal</div>
-                  {stream.time ? (<div>{formatTime(stream.time.data[current])}</div>) : <div></div>}
+                  {stream.time ? (<div>{formatTime(stream.time.data[current])}</div>) : null}
                 </div>
                 {current}
               </div>
@@ -347,6 +345,20 @@ function Run() {
                 : (<button className="icon" onClick={handleRunStartClick}><i className="fas fa-play"></i></button>)
               }
               <button className="icon" onClick={() => handleRunSpeedClick('high')}><i className="fas fa-step-forward"></i></button>
+            </div>
+            <div className="addRunPopup">
+              {isPopupOpen && (
+                <div className="popup">
+                  <div className="popup-content">
+                    <ul>
+                      {runs.map((run) => (
+                        <li key={run._id}>{run.activity.name}{" (" + run.distance.toFixed(2) + "m)"}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+              <button onClick={handlePopup}>{isPopupOpen ? "Hide Runs" : "Show Runs"}</button>
             </div>
           </MapContainer>
         )}

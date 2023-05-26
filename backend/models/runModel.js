@@ -8,6 +8,10 @@ var runSchema = new Schema({
   },
   activity: Object,
   stream: Object,
+  location: {
+    coordinates: [Number],
+    type: { type: String, default: "Point" }
+  },
 });
 
 module.exports = mongoose.model("run", runSchema);

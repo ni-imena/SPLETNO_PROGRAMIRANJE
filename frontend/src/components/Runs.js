@@ -107,7 +107,6 @@ function Runs() {
               }
             }
 
-            // Adjust result based on sort direction
             if (sortDirection === 'desc') {
               result *= -1;
             }
