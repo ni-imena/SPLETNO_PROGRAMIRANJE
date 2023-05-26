@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { UserContext } from '../userContext';
-import { Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { MapContainer, TileLayer, CircleMarker } from 'react-leaflet';
+import moment from "moment";
 import L from 'leaflet';
 import 'leaflet-css';
 import './Run.css';
@@ -239,6 +240,10 @@ function Run() {
     }
   };
 
+  const getElevation = (altitudeArray) => {
+    return (Math.max(...altitudeArray) - Math.min(...altitudeArray)).toFixed(0);
+  };
+
   useEffect(() => {
     console.log(isPlotting);
     if (isPlotting && !isPaused) {
@@ -346,19 +351,40 @@ function Run() {
               }
               <button className="icon" onClick={() => handleRunSpeedClick('high')}><i className="fas fa-step-forward"></i></button>
             </div>
-            <div className="addRunPopup">
+            <div className={isPopupOpen ? "addRunPopup" : "addRun"}>
               {isPopupOpen && (
                 <div className="popup">
                   <div className="popup-content">
-                    <ul>
+                    <ul className="list-group">
+                      <li className="list-group-item rounded-6 mb-2 title-row">
+                        <div className="row column-title">
+                          <div className="col-2">Away</div>
+                          <div className="col-2">Name</div>
+                          <div className="col-2">Date</div>
+                          <div className="col-2">Time</div>
+                          <div className="col-2">Distance</div>
+                          <div className="col-2">Elevation</div>
+                        </div>
+                      </li>
                       {runs.map((run) => (
-                        <li key={run._id}>{run.activity.name}{" (" + run.distance.toFixed(2) + "m)"}</li>
+                        <button className="list-group-item rounded-6 mb-2 item-row" key={run._id} /*onClick={handleAddRun}*/>
+                          <div className="row align-items-center column-item">
+                            <div className="col-2"><h6 className="mb-0">{run.distance.toFixed(2)} km</h6></div>
+                            <div className="col-2"><h6 className="mb-0">{run.activity.name}</h6></div>
+                            <div className="col-2"><h6 className="mb-0">{moment(run.activity.start_date).format("D/M/YYYY")}</h6></div>
+                            <div className="col-2"><h6 className="mb-0">{formatTime(run.activity.elapsed_time)}</h6></div>
+                            <div className="col-2"><h6 className="mb-0">{`${(run.activity.distance / 1000).toFixed(2)} km`}</h6></div>
+                            <div className="col-2"><h6 className="mb-0">{run.stream.altitude && run.stream.altitude.data ? getElevation(run.stream.altitude.data) + "m" : ''}</h6></div>
+                          </div>
+                        </button>
                       ))}
                     </ul>
                   </div>
                 </div>
               )}
-              <button onClick={handlePopup}>{isPopupOpen ? "Hide Runs" : "Show Runs"}</button>
+              {isPopupOpen ?
+                (<button className="addRunButtonOpen" onClick={handlePopup}>Hide</button>) :
+                (<button className="addRunButtonClose" onClick={handlePopup}>Add Run</button>)}
             </div>
           </MapContainer>
         )}

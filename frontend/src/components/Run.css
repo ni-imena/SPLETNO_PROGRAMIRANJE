@@ -4,8 +4,7 @@
 }
 
 .runData,
-.controls,
-.addRunPopup {
+.controls {
     position: fixed;
     left: 20px;
     background: white;
@@ -38,18 +37,46 @@
 
 .addRunPopup {
     bottom: 20px;
-    left: 270px;
+    right: 20px;
     width: auto;
-    max-height: fit-content;
+    min-width: 75%;
+    position: fixed;
+    background: white;
+    padding: 5px;
+    border: 3px solid black;
+    border-radius: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
 }
 
-.addRunPopup button {
+.addRun {
+    bottom: 20px;
+    right: 20px;
+    width: auto;
+    position: fixed;
+    background: white;
+    padding: 5px;
+    border: 3px solid black;
+    border-radius: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+}
+
+.addRunButtonClose {
     background: none;
     border: none;
     font-size: 1.8rem;
     font-weight: bold;
     text-align: center;
-    padding: 0px 10px
+    padding: 0px 10px;
+}
+
+.addRunButtonOpen {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    text-align: center;
+    font-weight: bold;
+    padding: 0px 10px;
+    width: 100%;
 }
 
 .controls {
@@ -95,4 +122,11 @@
     transform: scale(0.08);
     width: 100%;
     height: 100%;
+}
+
+.popup-text {
+    white-space: nowrap;
+    overflow: clip;
+    text-overflow: ellipsis;
+    overflow-clip-margin: 10px;
 }

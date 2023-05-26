@@ -116,7 +116,7 @@ function Runs() {
           .map((run, index) => (
             <Link
               to={`/runs/${run._id}`}
-              className={`list-group-item rounded-6 mb-2 item-row ${index % 2 === 0 ? "even-row" : "odd-row"}`}
+              className={`list-group-item rounded-6 mb-2 ${index % 2 === 0 ? "even-row" : "odd-row"}`}
               key={run._id}
             >
               <div className="row align-items-center">
