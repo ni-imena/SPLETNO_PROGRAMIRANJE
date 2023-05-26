@@ -50,6 +50,10 @@
     padding: 0px 10px
 }
 
+.controls span{
+    border: 1px;
+}
+
 .line { 
     fill: none; 
     stroke-width: 2px; 
@@ -72,7 +76,8 @@
 }
   
 .runner-animation {
-    background-image: url('runner.gif');
+    background-image: url('Icons/cyan.png');
+    transform: scale(0.08);
     width: 100%;
     height: 100%;
 }

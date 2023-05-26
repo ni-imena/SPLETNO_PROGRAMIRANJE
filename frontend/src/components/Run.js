@@ -137,11 +137,10 @@ function Run() {
     const runningIcon = L.divIcon({
       className: 'runner-icon',
       html: '<div class="runner-animation"></div>',
-      iconSize: [57, 67],
-      iconAnchor: [28, 40],
-      popupAnchor: [-3, -76],
+      iconSize: [330, 428],
+      iconAnchor: [165, 230]
     });
-      
+
     runnerMarkerRef.current = L.marker([lat, lng], {
       icon: runningIcon,
     }).addTo(mapRef.current);
@@ -187,12 +186,18 @@ function Run() {
       setIsPlotting(true);
       iRef.current = 1;
       mapRef.current.flyTo(stream.latlng.data[0], 18);
-      polylineRef.current = L.polyline([], { color: 'red', weight: 3 }).addTo(mapRef.current);
+      polylineRef.current = L.polyline([], { color: 'cyan', weight: 3 }).addTo(mapRef.current);
       drawPlotPoint();
     }
   };
 
-  const handleRunStartClick = () => { startPlotting(); };
+  const handleRunStartClick = () => {
+    if (isAnimationComplete) {
+      handleRunRestartClick();
+    } else {
+      startPlotting();
+    }
+  };
 
   const handleRunPauseClick = () => {
     if (isPlotting) {
@@ -209,13 +214,14 @@ function Run() {
 
   const handleRunSpeedClick = (direction) => {
     if (direction === 'low') {
-      setSpeed(prevSpeed => prevSpeed / 2);
+      if (speed <= 0.25) setSpeed(prevSpeed => prevSpeed); else setSpeed(prevSpeed => prevSpeed / 2);
     } else if (direction === 'high') {
-      setSpeed(prevSpeed => prevSpeed * 2);
+      if (speed >= 512) setSpeed(prevSpeed => prevSpeed); else setSpeed(prevSpeed => prevSpeed * 2);
     }
   };
 
   const velocityToPace = velocity => { // convert m/s to pace in mm:ss format
+    if (current <= 1) { return `0:00`; }
     const pace = 60 / (velocity * 3.6);
     const minutes = Math.floor(pace);
     const seconds = Math.round((pace - minutes) * 60);
@@ -239,6 +245,7 @@ function Run() {
   };
 
   useEffect(() => {
+    console.log(isPlotting);
     if (isPlotting && !isPaused) {
       startPlotting();
     }
@@ -270,10 +277,38 @@ function Run() {
     return [centerLat, centerLng];
   }
 
+  const handleRunRestartClick = () => {
+    //setIsPlotting(false);
+    setIsPaused(false);
+    setSpeed(1);
+    setCurrent(1);
+    setIsAnimationComplete(false);
+
+    if (polylineRef.current) {
+      mapRef.current.removeLayer(polylineRef.current);
+      polylineRef.current = null;
+    }
+
+    iRef.current = 0;
+
+    if (runnerMarkerRef.current) {
+      mapRef.current.removeLayer(runnerMarkerRef.current);
+      runnerMarkerRef.current = null;
+    }
+
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+
+    polylineRef.current = L.polyline([], { color: 'cyan', weight: 3 }).addTo(mapRef.current);
+
+    startPlotting();
+  };
+
   return (
     <div>
       <div>
-        {stream && (
+        {stream && stream.latlng && (
           <MapContainer ref={mapRef} className="map" id="map" center={calculateCenter(stream.latlng.data)} zoom={15} doubleClickZoom={false}>
             <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>" />
             {/* <CircleMarker center={calculateCenter(stream.latlng.data)} radius={5} color="blue" fillColor="blue" fillOpacity={1} /> */}
@@ -304,14 +339,13 @@ function Run() {
             )}
             <div className="controls">
               <button className="icon" onClick={toggleCentering}><i className="fas fa-arrows-alt"></i></button>
-              <button className="icon"><i className="fas fa-redo"></i></button>
+              <button className="icon" onClick={handleRunRestartClick}><i className="fas fa-redo"></i></button>
               <span className="speedup">{speed}x</span>
               <button className="icon" onClick={() => handleRunSpeedClick('low')}><i className="fas fa-step-backward"></i></button>
               {isPlotting
                 ? (<button className="icon" onClick={handleRunPauseClick}><i className={isPaused ? "fas fa-play" : "fas fa-pause"}></i></button>)
                 : (<button className="icon" onClick={handleRunStartClick}><i className="fas fa-play"></i></button>)
               }
-
               <button className="icon" onClick={() => handleRunSpeedClick('high')}><i className="fas fa-step-forward"></i></button>
             </div>
           </MapContainer>

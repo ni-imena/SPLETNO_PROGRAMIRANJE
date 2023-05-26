@@ -48,6 +48,10 @@ function Runs() {
     }
   };
 
+  const getElevation = (altitudeArray) => {
+    return (Math.max(...altitudeArray) - Math.min(...altitudeArray)).toFixed(0);
+  };
+
   const formatTime = (timeInSeconds) => {
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
@@ -79,7 +83,7 @@ function Runs() {
             <div className="col-2" onClick={() => handleSort('date')}>Date {sortField === 'date' && (<i className={`fas ${sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'}`}></i>)}</div>
             <div className="col-2" onClick={() => handleSort('time')}>Time {sortField === 'time' && (<i className={`fas ${sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'}`}></i>)}</div>
             <div className="col-2" onClick={() => handleSort('distance')}>Distance {sortField === 'distance' && (<i className={`fas ${sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'}`}></i>)}</div>
-            <div className="col-2"></div>
+            <div className="col-2" onClick={() => handleSort('elevation')}>Elevation {sortField === 'elevation' && (<i className={`fas ${sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'}`}></i>)}</div>
           </div>
         </li>
 
@@ -97,6 +101,10 @@ function Runs() {
               result = a.activity.elapsed_time - b.activity.elapsed_time;
             } else if (sortField === 'distance') {
               result = a.activity.distance - b.activity.distance;
+            } else if (sortField === 'elevation') {
+              if (a.stream.altitude && a.stream.altitude.data && b.stream.altitude && b.stream.altitude.data) {
+                result = getElevation(a.stream.altitude.data) - getElevation(b.stream.altitude.data);
+              }
             }
 
             // Adjust result based on sort direction
@@ -114,11 +122,11 @@ function Runs() {
             >
               <div className="row align-items-center">
                 <div className="col-1"><span className="badge bg-secondary">{run.activity.type}</span></div>
-                <div className="col-3"><h5 className="mb-0 truncate-text">{run._id}</h5></div>
+                <div className="col-3"><h5 className="mb-0 truncate-text">{run.activity.name}</h5></div>
                 <div className="col-2"><small className="mb-0 truncate-text">{moment(run.activity.start_date).format("D/M/YYYY")}</small></div>
                 <div className="col-2">{formatTime(run.activity.elapsed_time)}</div>
                 <div className="col-2"><span className="mb-0 truncate-text">{`${(run.activity.distance / 1000).toFixed(2)} km`}</span></div>
-                <div className="col-2 d-none d-sm-block"><button className="button mb-0 truncate-text">View</button></div>
+                <div className="col-2">{run.stream.altitude && run.stream.altitude.data ? getElevation(run.stream.altitude.data) + "m" : ''}</div>
               </div>
             </Link>
           ))}
