@@ -91,12 +91,12 @@ function Login() {
         <div className="outside-group" style={{ flexDirection: 'column' }}>
           <div className="button-row">
             <button className="form-button">
-              <i class="fa-brands fa-google" style={{ fontSize: '24px', marginRight: '5px' }}></i>
+              <i className="fa-brands fa-google" style={{ fontSize: '24px', marginRight: '5px' }}></i>
               Login with Google</button>
           </div>
           <div className="button-row">
             <button className="form-button" >
-              <i class="fa-brands fa-facebook" style={{ fontSize: "24px", marginRight: '5px' }}></i>
+              <i className="fa-brands fa-facebook" style={{ fontSize: "24px", marginRight: '5px' }}></i>
               Login with Facebook
             </button>
           </div>

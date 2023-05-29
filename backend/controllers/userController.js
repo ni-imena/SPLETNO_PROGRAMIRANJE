@@ -41,6 +41,7 @@ module.exports = {
       username: req.body.username,
       password: req.body.password,
       email: req.body.email,
+      admin: false
     });
 
     user.save(function (err, user) {

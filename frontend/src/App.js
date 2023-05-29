@@ -11,6 +11,8 @@ import Map from "./components/Map";
 import Runs from "./components/Runs";
 import Home from "./components/Home";
 import Run from "./components/Run";
+import AdminUsers from "./components/AdminUsers"
+
 
 function App() {
   const [user, setUser] = useState(
@@ -42,6 +44,7 @@ function App() {
             <Route path="/runs" element={<Runs />}></Route>
             <Route path="/stravaAuth" element={<RedirectPage />} />
             <Route path="/runs/:id" element={<Run />} />
+            <Route path="/adminUsers" element={<AdminUsers />} />
           </Routes>
         </div>
       </UserContext.Provider>

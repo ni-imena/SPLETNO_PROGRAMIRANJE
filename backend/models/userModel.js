@@ -10,6 +10,7 @@ var userSchema = new Schema({
   password: String,
   email: String,
   stravaId: String,
+  admin: Boolean
 });
 
 //iskanje tekov okoli uporabnika

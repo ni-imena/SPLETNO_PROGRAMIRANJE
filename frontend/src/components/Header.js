@@ -1,7 +1,14 @@
+import { useContext } from "react";
 import { UserContext } from "../userContext";
 import { Link } from "react-router-dom";
 
 function Header(props) {
+    const userContext = useContext(UserContext);
+
+    const getPrivs = () => {
+        return userContext.user.admin;
+    };
+
     return (
         <header className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container">
@@ -12,21 +19,21 @@ function Header(props) {
                 <nav className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav ms-auto">
                         <li className="nav-item"><Link className="nav-link" to="/">Home</Link></li>
-                        <UserContext.Consumer>
-                            {context => (
-                                context.user ?
-                                    <>
-                                        <li className="nav-item"><Link className="nav-link" to="/runs">My Runs</Link></li>
-                                        <li className="nav-item"><Link className="nav-link" to="/profile">Profile</Link></li>
-                                        <li className="nav-item"><Link className="nav-link" to="/logout">Logout</Link></li>
-                                    </>
-                                    :
-                                    <>
-                                        <li className="nav-item"><Link className="nav-link" to="/login">Login</Link></li>
-                                        <li className="nav-item"><Link className="nav-link" to="/register">Register</Link></li>
-                                    </>
-                            )}
-                        </UserContext.Consumer>
+                        {userContext.user ? (
+                            <>
+                                <li className="nav-item"><Link className="nav-link" to="/runs">My Runs</Link></li>
+                                <li className="nav-item"><Link className="nav-link" to="/profile">Profile</Link></li>
+                                {getPrivs() && (
+                                    <li className="nav-item"><Link className="nav-link" to="/adminUsers">Admin</Link></li>
+                                )}
+                                <li className="nav-item"><Link className="nav-link" to="/logout">Logout</Link></li>
+                            </>
+                        ) : (
+                            <>
+                                <li className="nav-item"><Link className="nav-link" to="/login">Login</Link></li>
+                                <li className="nav-item"><Link className="nav-link" to="/register">Register</Link></li>
+                            </>
+                        )}
                     </ul>
                 </nav>
             </div>
