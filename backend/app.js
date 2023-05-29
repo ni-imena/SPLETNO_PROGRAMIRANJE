@@ -18,6 +18,7 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/userRoutes");
 var runsRouter = require("./routes/runRoutes");
 var weathersRouter = require("./routes/weatherRoutes");
+var setRunsRouter = require("./routes/setRunRoutes");
 var app = express();
 
 var cors = require("cors");
@@ -68,6 +69,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/runs", runsRouter);
 app.use("/weather", weathersRouter);
+app.use("/setRuns", setRunsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

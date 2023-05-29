@@ -1,0 +1,46 @@
+#homeMap {
+    width: 100%;
+    height: calc(100vh - 300px);
+}
+
+.homeScreenGrid {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-column-gap: 10px;
+}
+
+.homeRuns {
+    width: 100%;
+}
+
+.homeTitleRow {
+    display: flex;
+    background-color: #ffffff;
+    font-weight: bold;
+}
+
+.homeListGroupItem {
+    border: none;
+    border-radius: 15px;
+}
+
+.homeListGroupItem:hover {
+    filter: brightness(90%);
+    text-decoration: none;
+}
+
+.homeColumnTitle {
+    flex: auto;
+}
+
+.homeTruncate {
+    white-space: nowrap;
+    overflow: clip;
+    text-overflow: ellipsis;
+    overflow-clip-margin: 10px;
+}
+
+.homeColumnItem {
+    flex: auto;
+    text-align: left;
+}

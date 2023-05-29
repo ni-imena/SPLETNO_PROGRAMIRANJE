@@ -126,17 +126,24 @@ module.exports = {
       if (error) {
         return next(error);
       } else {
-        //console.log(user);
         if (user === null) {
           var err = new Error("Not authorized, go back!");
           err.status = 400;
           return next(err);
         } else {
-          var responseData = {
-            user: user,
-            accessToken: req.newAccessToken
-          };
-          return res.json(responseData);
+          // Get number of runs
+          RunModel.countDocuments({ userId: user._id }, function (error, runCount) {
+            if (error) {
+              return next(error);
+            } else {
+              var responseData = {
+                user: user,
+                runCount: runCount,
+                accessToken: req.newAccessToken
+              };
+              return res.json(responseData);
+            }
+          });
         }
       }
     });

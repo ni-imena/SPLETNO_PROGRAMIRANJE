@@ -76,8 +76,8 @@ function Runs() {
       {!userContext.user ? <Navigate replace to="/login" /> : ""}
       <ul className="list-group">
         {/* Column titles */}
-        <li className="list-group-item rounded-6 mb-2 title-row">
-          <div className="row column-title">
+        <li className="list-group-item rounded-6 mb-2 title-row runsTitleRow runsListGroupItem">
+          <div className="row column-title runsColumnTitle">
             <div className="col-1" onClick={() => handleSort('type')}>Type {sortField === 'type' && (<i className={`fas ${sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'}`}></i>)}</div>
             <div className="col-3" onClick={() => handleSort('name')}>Name {sortField === 'name' && (<i className={`fas ${sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'}`}></i>)}</div>
             <div className="col-2" onClick={() => handleSort('date')}>Date {sortField === 'date' && (<i className={`fas ${sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'}`}></i>)}</div>
@@ -116,15 +116,15 @@ function Runs() {
           .map((run, index) => (
             <Link
               to={`/runs/${run._id}`}
-              className={`list-group-item rounded-6 mb-2 ${index % 2 === 0 ? "even-row" : "odd-row"}`}
+              className={`runsListGroupItem list-group-item rounded-6 mb-2 ${index % 2 === 0 ? "evenRow" : "oddRow"}`}
               key={run._id}
             >
               <div className="row align-items-center">
                 <div className="col-1"><span className="badge bg-secondary">{run.activity.type}</span></div>
-                <div className="col-3"><h5 className="mb-0 truncate-text">{run.activity.name}</h5></div>
-                <div className="col-2"><small className="mb-0 truncate-text">{moment(run.activity.start_date).format("D/M/YYYY")}</small></div>
+                <div className="col-3"><h5 className="mb-0 truncate-text runsTruncate">{run.activity.name}</h5></div>
+                <div className="col-2"><small className="mb-0 truncate-text runsTruncate">{moment(run.activity.start_date).format("D/M/YYYY")}</small></div>
                 <div className="col-2">{formatTime(run.activity.elapsed_time)}</div>
-                <div className="col-2"><span className="mb-0 truncate-text">{`${(run.activity.distance / 1000).toFixed(2)} km`}</span></div>
+                <div className="col-2"><span className="mb-0 truncate-text runsTruncate">{`${(run.activity.distance / 1000).toFixed(2)} km`}</span></div>
                 <div className="col-2">{run.stream.altitude && run.stream.altitude.data ? getElevation(run.stream.altitude.data) + "m" : ''}</div>
               </div>
             </Link>

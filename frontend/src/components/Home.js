@@ -1,9 +1,64 @@
+import { useContext, useEffect, useState, useRef } from 'react';
+import { MapContainer, TileLayer, CircleMarker } from 'react-leaflet';
+import "./Home.css";
+import 'leaflet-css';
+
 function Home() {
+  const [runs, setRuns] = useState([]);
+  const [selectedRun, setSelectedRun] = useState(null);
+  const mapRef = useRef(null);
+  const currentLocation = useRef(null);
+
+  useEffect(function () {
+    const getRuns = async function () {
+      const res = await fetch("http://localhost:3001/setRuns");
+      const data = await res.json();
+      setRuns(data);
+    };
+    getRuns();
+  }, []);
+
+
+  const handleRunClick = (run) => {
+    mapRef.current.flyTo(run.location.coordinates, 15);
+    setSelectedRun(run);
+  };
+
   return (
-    <div className="container">
-      <p>Home</p>
+    <div className="container mt-4 homeScreenGrid">
+      <div>
+        <MapContainer ref={mapRef} className="homeMap" id="homeMap" center={/*currentLocation ? currentLocation : */[46.285502, 15.300966500000001]} zoom={15} doubleClickZoom={false}>
+          <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>" />
+        </MapContainer>
+      </div>
+      {runs && (
+        <div className="homeRuns">
+          <ul className="list-group">
+            <li className="list-group-item rounded-6 mb-2 title-row homeTitleRow homeListGroupItem">
+              <div className="row column-title homeColumnTitle">
+                <div className="col-4">Name</div>
+                <div className="col-3">Distance</div>
+                <div className="col-5">Elevation</div>
+              </div>
+            </li>
+            {runs.map((run) => (
+              <button className="homeListGroupItem list-group-item rounded-6 mb-2" key={run._id} onClick={() => handleRunClick(run)}>
+                <div className="row align-items-center homeColumnItem">
+                  <div className="col-4"><h5 className="mb-0 homeTruncate">{run.name}</h5></div>
+                  <div className="col-3"><span className="mb-0 homeTruncate">{`${(run.distance / 1000).toFixed(2)} km`}</span></div>
+                  <div className="col-5">{run.location.coordinates}</div>
+                </div>
+              </button>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
+
+
+
+
 }
 
 export default Home;

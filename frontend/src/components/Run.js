@@ -22,7 +22,6 @@ function Run() {
   const [runs, setRuns] = useState([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
-
   const mapRef = useRef(null);
   const polylineRef = useRef(null);
   const runnerMarkerRef = useRef(null);
@@ -131,10 +130,10 @@ function Run() {
       mapRef.current.removeLayer(runnerMarkerRef.current);
     }
     const runningIcon = L.divIcon({
-      className: 'runner-icon',
-      html: '<div class="runner-animation"></div>',
+      className: 'runnerIcon',
+      html: '<div class="runnerAnimation"></div>',
       iconSize: [330, 428],
-      iconAnchor: [165, 230]
+      iconAnchor: [165, 232]
     });
 
     runnerMarkerRef.current = L.marker([lat, lng], {
@@ -152,7 +151,6 @@ function Run() {
       setIsPlotting(false);
     }
   };
-
 
   const getDistance = (lat1, lng1, lat2, lng2) => {
     if (lat1 === lat2 && lng1 === lng2) {
@@ -312,7 +310,7 @@ function Run() {
     <div>
       <div>
         {stream && runs && (
-          <MapContainer ref={mapRef} className="map" id="map" center={calculateCenter(stream.latlng.data)} zoom={15} doubleClickZoom={false}>
+          <MapContainer ref={mapRef} className="runMap" id="runMap" center={calculateCenter(stream.latlng.data)} zoom={15} doubleClickZoom={false}>
             <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>" />
             {/* <CircleMarker center={calculateCenter(stream.latlng.data)} radius={5} color="blue" fillColor="blue" fillOpacity={1} /> */}
             {isPlotting && (
@@ -356,8 +354,8 @@ function Run() {
                 <div className="popup">
                   <div className="popup-content">
                     <ul className="list-group">
-                      <li className="list-group-item rounded-6 mb-2 title-row">
-                        <div className="row column-title">
+                      <li className="list-group-item rounded-6 mb-2 title-row runTitleRow runsListGroupItem">
+                        <div className="row column-title runColumnTitle">
                           <div className="col-2">Away</div>
                           <div className="col-2">Name</div>
                           <div className="col-2">Date</div>
@@ -366,25 +364,28 @@ function Run() {
                           <div className="col-2">Elevation</div>
                         </div>
                       </li>
-                      {runs.map((run) => (
-                        <button className="list-group-item rounded-6 mb-2 item-row" key={run._id} /*onClick={handleAddRun}*/>
-                          <div className="row align-items-center column-item">
-                            <div className="col-2"><h6 className="mb-0">{run.distance.toFixed(2)} km</h6></div>
-                            <div className="col-2"><h6 className="mb-0">{run.activity.name}</h6></div>
-                            <div className="col-2"><h6 className="mb-0">{moment(run.activity.start_date).format("D/M/YYYY")}</h6></div>
-                            <div className="col-2"><h6 className="mb-0">{formatTime(run.activity.elapsed_time)}</h6></div>
-                            <div className="col-2"><h6 className="mb-0">{`${(run.activity.distance / 1000).toFixed(2)} km`}</h6></div>
-                            <div className="col-2"><h6 className="mb-0">{run.stream.altitude && run.stream.altitude.data ? getElevation(run.stream.altitude.data) + "m" : ''}</h6></div>
-                          </div>
-                        </button>
-                      ))}
+                      {runs
+                        .sort((a, b) => a.distance - b.distance)
+                        .map((run) => (
+                          <button className="list-group-item rounded-6 mb-2 item-row runItemRow runsListGroupItem" key={run._id} /*onClick={handleAddRun}*/>
+                            <div className="row align-items-center column-item runColumnItem">
+                              <div className="col-2"><h6 className="mb-0">{run.distance.toFixed(2)} km</h6></div>
+                              <div className="col-2"><h6 className="mb-0">{run.activity.name}</h6></div>
+                              <div className="col-2"><h6 className="mb-0">{moment(run.activity.start_date).format("D/M/YYYY")}</h6></div>
+                              <div className="col-2"><h6 className="mb-0">{formatTime(run.activity.elapsed_time)}</h6></div>
+                              <div className="col-2"><h6 className="mb-0">{`${(run.activity.distance / 1000).toFixed(2)} km`}</h6></div>
+                              <div className="col-2"><h6 className="mb-0">{run.stream.altitude && run.stream.altitude.data ? getElevation(run.stream.altitude.data) + "m" : ''}</h6></div>
+                            </div>
+                          </button>
+                        ))}
                     </ul>
                   </div>
                 </div>
               )}
               {isPopupOpen ?
                 (<button className="addRunButtonOpen" onClick={handlePopup}>Hide</button>) :
-                (<button className="addRunButtonClose" onClick={handlePopup}>Add Run</button>)}
+                (<button className="addRunButtonClose" onClick={handlePopup}>Add Run</button>)
+              }
             </div>
           </MapContainer>
         )}

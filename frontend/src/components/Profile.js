@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../userContext";
 import { Navigate } from "react-router-dom";
+import "./Profile.css";
 
 const CLIENT_ID = "105822";
 const REDIRECT_URI = "http://localhost:3000/stravaAuth";
@@ -10,6 +11,7 @@ function Profile() {
   const [profile, setProfile] = useState({});
   const [tokenExpired, setTokenExpired] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [numOfRuns, setNumOfRuns] = useState([]);
 
   useEffect(() => {
     const getProfile = async () => {
@@ -32,6 +34,7 @@ function Profile() {
       else {
         setTokenExpired(false);
         setProfile(data.user);
+        setNumOfRuns(data.runCount);
       }
       setLoading(false);
     };
@@ -52,16 +55,20 @@ function Profile() {
   }
 
   return (
-    <div className="container">
+    <div className="container profile mt-5">
       {!userContext.user ? <Navigate replace to="/login" /> : ""}
-      <h1>User profile</h1>
-      <p>Username: {profile.username}</p>
-      <p>Email: {profile.email}</p>
-      {!profile.stravaId && <button className="btn btn-primary" onClick={handleLogin}>
-        Authorize Strava
-      </button>}
+      <h1 className="header profileHeader">Profile</h1>
+      <p className="profile-item profileItem">Username: {profile.username}</p>
+      <p className="profile-item profileItem">Email: {profile.email}</p>
+      <p className="profile-item profileItem">Runs Uploaded: {numOfRuns}</p>
+      {!profile.stravaId && (
+        <button className="btn btn-primary profileStravaButton" onClick={handleLogin}>
+          Authorize Strava
+        </button>
+      )}
     </div>
   );
+
 }
 
 export default Profile;
