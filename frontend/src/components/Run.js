@@ -2,6 +2,7 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { UserContext } from '../userContext';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { MapContainer, TileLayer, CircleMarker } from 'react-leaflet';
+import Sidebar from "./Sidebar"
 import moment from "moment";
 import L from 'leaflet';
 import 'leaflet-css';
@@ -21,6 +22,7 @@ function Run() {
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const [runs, setRuns] = useState([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(true);
 
   const mapRef = useRef(null);
   const polylineRef = useRef(null);
@@ -312,6 +314,7 @@ function Run() {
         {stream && runs && (
           <MapContainer ref={mapRef} className="runMap" id="runMap" center={calculateCenter(stream.latlng.data)} zoom={15} doubleClickZoom={false}>
             <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>" />
+            <Sidebar stream={stream} current={current} />
             {/* <CircleMarker center={calculateCenter(stream.latlng.data)} radius={5} color="blue" fillColor="blue" fillOpacity={1} /> */}
             {isPlotting && (
               <div className='runData'>
@@ -335,7 +338,6 @@ function Run() {
                   <div>{Math.round(activity.calories * current / stream.distance.data.length)} kcal</div>
                   {stream.time ? (<div>{formatTime(stream.time.data[current])}</div>) : null}
                 </div>
-                {current}
               </div>
             )}
             <div className="controls">

@@ -21,6 +21,7 @@
 
 .runData {
     display: grid;
+    position: absolute;
     grid-template-columns: auto auto;
     padding: 10px;
 }
@@ -42,7 +43,7 @@
     min-width: 75%;
     max-height: 80%;
     overflow-y: scroll;
-    position: fixed;
+    position: absolute;
     background: white;
     padding: 5px;
     border: 3px solid black;
@@ -54,7 +55,7 @@
     bottom: 20px;
     right: 20px;
     width: auto;
-    position: fixed;
+    position: absolute;
     background: white;
     padding: 5px;
     border: 3px solid black;
@@ -84,6 +85,7 @@
 .controls {
     bottom: 20px;
     display: grid;
+    position: absolute;
     grid-template-columns: auto auto auto;
     justify-content: space-evenly;
 }
@@ -96,23 +98,6 @@
     font-weight: bold;
     text-align: center;
     padding: 0px 10px
-}
-
-.line {
-    fill: none;
-    stroke-width: 2px;
-}
-
-.statistics svg:nth-of-type(1) path {
-    stroke: red;
-}
-
-.statistics svg:nth-of-type(2) path {
-    stroke: blue;
-}
-
-.statistics svg:nth-of-type(3) path {
-    stroke: green;
 }
 
 .runnerIcon {
@@ -149,4 +134,8 @@
     display: flex;
     background-color: #ffffff;
     font-weight: bold;
+}
+
+.sidebar {
+    
 }
