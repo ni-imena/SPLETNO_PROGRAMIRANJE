@@ -39,7 +39,7 @@ function Login() {
     } else {
       setUsername("");
       setPassword("");
-      setError("Invalid username or password");
+      setError("Wrong username or password");
     }
   }
 
@@ -82,7 +82,8 @@ function Login() {
             </div>
           </div>
         </form>
-        <div className="or-divider">
+
+        {/*<div className="or-divider">
           <span className="line"></span>
           <span className="or-text">OR</span>
           <span className="line"></span>
@@ -100,7 +101,7 @@ function Login() {
               Login with Facebook
             </button>
           </div>
-        </div>
+        </div>*/}
 
         <div className="or-divider">
           <span className="line"></span>

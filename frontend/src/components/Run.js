@@ -56,9 +56,16 @@ function Run() {
 
   useEffect(function () {
     const fetchRuns = async function () {
-      const res = await fetch(`http://localhost:3001/runs/nearby/${id}`);
+      let headers = {};
+      if (userContext.user) {
+        headers = {
+          'Authorization': `Bearer ${userContext.user._id}`
+        };
+      }
+      const res = await fetch(`http://localhost:3001/runs/nearby/${id}`, {
+        headers: headers
+      });
       const data = await res.json();
-      console.log(data.runs);
       setRuns(data.runs);
     };
     fetchRuns();
@@ -245,7 +252,6 @@ function Run() {
   };
 
   useEffect(() => {
-    console.log(isPlotting);
     if (isPlotting && !isPaused) {
       startPlotting();
     }
@@ -314,7 +320,7 @@ function Run() {
         {stream && runs && (
           <MapContainer ref={mapRef} className="runMap" id="runMap" center={calculateCenter(stream.latlng.data)} zoom={15} doubleClickZoom={false}>
             <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>" />
-            <Sidebar stream={stream} current={current} />
+            <Sidebar stream={stream} current={current} speed={speed} />
             {/* <CircleMarker center={calculateCenter(stream.latlng.data)} radius={5} color="blue" fillColor="blue" fillOpacity={1} /> */}
             {isPlotting && (
               <div className='runData'>

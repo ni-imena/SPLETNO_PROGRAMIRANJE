@@ -37,28 +37,64 @@ module.exports = {
   },
 
   create: function (req, res) {
-    var user = new UserModel({
-      username: req.body.username,
-      password: req.body.password,
-      email: req.body.email,
-      admin: false
-    });
 
-    user.save(function (err, user) {
+    if (req.body.password !== req.body.repeatPassword) {
+      return res.status(500).json({
+        message: "Passwords do not match"
+      });
+    }
+    UserModel.findOne({ username: req.body.username }, function (err, existingUser) {
       if (err) {
         return res.status(500).json({
-          message: "Error when creating user",
+          message: "Error when finding user",
           error: err,
         });
       }
 
-      return res.status(201).json(user);
-      //return res.redirect('/users/login');
+      if (existingUser) {
+        return res.status(409).json({
+          message: "Username is already taken",
+        });
+      }
+
+      UserModel.findOne({ email: req.body.email }, function (err, existingEmail) {
+        if (err) {
+          return res.status(500).json({
+            message: "Error when finding user",
+            error: err,
+          });
+        }
+        if (existingEmail) {
+          return res.status(409).json({
+            message: "Account with that Email already exists",
+          });
+        }
+
+        var user = new UserModel({
+          username: req.body.username,
+          password: req.body.password,
+          email: req.body.email,
+          admin: false
+        });
+
+        user.save(function (err, savedUser) {
+          if (err) {
+            return res.status(500).json({
+              message: "Error when creating user",
+              error: err,
+            });
+          }
+
+          return res.status(201).json(savedUser);
+        });
+      })
     });
   },
 
   update: function (req, res) {
     var id = req.params.id;
+
+
     UserModel.findOne({ _id: id }, function (err, user) {
       if (err) {
         return res.status(500).json({
@@ -72,10 +108,12 @@ module.exports = {
           message: "No such user",
         });
       }
+
       user.username = req.body.username ? req.body.username : user.username;
       user.password = req.body.password ? req.body.password : user.password;
       user.email = req.body.email ? req.body.email : user.email;
       user.stravaId = req.body.stravaId ? req.body.stravaId : user.stravaId;
+      user.admin = (req.body.admin === user.admin) ? user.admin : req.body.admin;
 
       user.save(function (err, user) {
         if (err) {
@@ -104,7 +142,6 @@ module.exports = {
       return res.status(204).json();
     });
   },
-
 
   login: function (req, res, next) {
     UserModel.authenticate(

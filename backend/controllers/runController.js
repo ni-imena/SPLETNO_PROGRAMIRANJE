@@ -12,7 +12,8 @@ module.exports = {
 
   show: function (req, res) {
     var id = req.params.id;
-    RunModel.findOne({ _id: id }, function (err, run) {
+    const userId = req.headers.authorization.split(" ")[1];
+    RunModel.findOne({ _id: id, userId: userId }, function (err, run) {
       if (err) { return res.status(500).json({ message: "Error when getting run.", error: err, }); }
       if (!run) { return res.status(404).json({ message: "No such run", }); }
       return res.json(run);
@@ -94,26 +95,21 @@ module.exports = {
   },
 
   nearbyRuns: function (req, res) {
-    var id = req.params.id;
+    const id = req.params.id;
+    const userId = req.headers.authorization.split(" ")[1];
     RunModel.findOne({ _id: id }, function (err, run) {
       if (err) { return res.status(500).json({ message: "Error when getting run.", error: err, }); }
       if (!run) { return res.status(404).json({ message: "No such run", }); }
       const coords = run.location.coordinates
       RunModel.find({
-        _id: { $ne: id },
-        location: {
+        _id: { $ne: id }, userId: userId, location: {
           $near: {
-            $geometry: {
-              type: "Point",
-              coordinates: coords,
-            },
+            $geometry: { type: "Point", coordinates: coords, },
             $maxDistance: 1000,
           },
         },
       }, function (err, runs) {
-        if (err) {
-          return res.status(500).json({ message: "Error when getting runs.", error: err });
-        }
+        if (err) { return res.status(500).json({ message: "Error when getting runs.", error: err }); }
 
         const runsWithDistance = runs.map((run) => {
           const distance = getDistance(coords[0], coords[1], run.location.coordinates[0], run.location.coordinates[1]);
