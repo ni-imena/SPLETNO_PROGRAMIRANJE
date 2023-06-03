@@ -44,3 +44,18 @@
     flex: auto;
     text-align: left;
 }
+
+.homeGps {
+    position: absolute;
+    top: 80px;
+    left: 10px;
+}
+
+.gpsButton {
+    padding-left: 1px;
+    padding-top: 2px;
+}
+
+.gpsButton i:hover {
+    filter: brightness(80%);
+}

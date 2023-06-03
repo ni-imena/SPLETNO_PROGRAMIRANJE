@@ -351,10 +351,10 @@ function Run() {
               <button className="icon" onClick={handleRunRestartClick}><i className="fas fa-redo"></i></button>
               <span className="speedup">{speed}x</span>
               <button className="icon" onClick={() => handleRunSpeedClick('low')}><i className="fas fa-step-backward"></i></button>
-              {isPlotting
-                ? (<button className="icon" onClick={handleRunPauseClick}><i className={isPaused ? "fas fa-play" : "fas fa-pause"}></i></button>)
-                : (<button className="icon" onClick={handleRunStartClick}><i className="fas fa-play"></i></button>)
-              }
+              {isPlotting ? (
+                <button className="icon" onClick={handleRunPauseClick}><i className={isPaused ? "fas fa-play" : "fas fa-pause"}></i></button>
+              ) : (
+                <button className="icon" onClick={handleRunStartClick}><i className="fas fa-play"></i></button>)}
               <button className="icon" onClick={() => handleRunSpeedClick('high')}><i className="fas fa-step-forward"></i></button>
             </div>
             <div className={isPopupOpen ? "addRunPopup" : "addRun"}>

@@ -1,5 +1,7 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, CircleMarker } from 'react-leaflet';
+import io from "socket.io-client";
+
 import "./Home.css";
 import 'leaflet-css';
 
@@ -7,7 +9,8 @@ function Home() {
   const [runs, setRuns] = useState([]);
   const [selectedRun, setSelectedRun] = useState(null);
   const mapRef = useRef(null);
-  const currentLocation = useRef(null);
+  const [gpsLocation, setGPSLocation] = useState(null);
+
 
   useEffect(function () {
     const getRuns = async function () {
@@ -18,17 +21,72 @@ function Home() {
     getRuns();
   }, []);
 
+  useEffect(() => {
+    const getLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            setGPSLocation({ latitude, longitude });
+          },
+          (error) => {
+            console.error('Error retrieving GPS location:', error);
+          }
+        );
+      } else {
+        console.error('Geolocation is not supported by this browser.');
+      }
+    };
+
+    getLocation();
+  }, []);
+
+  useEffect(() => {
+    const socket = io("http://localhost:3001");
+    console.log("Socket.IO connection status:", socket.connected);
+    console.log(gpsLocation);
+    // Send GPS location updates to the server
+    socket.emit("gpsUpdate", gpsLocation); // Adjust the location data as needed
+
+    // Handle GPS location updates from the server
+    socket.on("gpsUpdate", (location) => {
+      console.log("Received GPS location update:", location);
+
+      // Further processing with the received location data
+    });
+
+    // Clean up the socket connection when the component unmounts
+    return () => {
+      socket.disconnect();
+    };
+  }, [gpsLocation]);
+
+
 
   const handleRunClick = (run) => {
     mapRef.current.flyTo(run.location.coordinates, 15);
     setSelectedRun(run);
   };
 
+  const handleCenterOnGPSLocation = () => {
+    if (mapRef.current && gpsLocation) {
+      mapRef.current.flyTo([gpsLocation.latitude, gpsLocation.longitude], 15);
+    }
+  };
+
   return (
     <div className="container mt-4 homeScreenGrid">
-      <div>
-        <MapContainer ref={mapRef} className="homeMap" id="homeMap" center={/*currentLocation ? currentLocation : */[46.285502, 15.300966500000001]} zoom={15} doubleClickZoom={false}>
+      <div className="homeMap" style={{ position: 'relative' }}>
+        <MapContainer ref={mapRef} className="homeMap" id="homeMap" center={gpsLocation ? [gpsLocation.latitude, gpsLocation.longitude] : [46.285502, 15.300966500000001]} zoom={15} doubleClickZoom={false}>
           <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>" />
+          {gpsLocation && (
+            <CircleMarker center={[gpsLocation.latitude, gpsLocation.longitude]} radius={5} color="blue" fillOpacity={1} />
+          )}
+          <div className="homeGps leaflet-bar">
+            <a className="gpsButton leaflet-control-zoom-in" onClick={() => handleCenterOnGPSLocation()}>
+              <i className="fas fa-compass"></i>
+            </a>
+          </div>
         </MapContainer>
       </div>
       {runs && (
@@ -55,10 +113,6 @@ function Home() {
       )}
     </div>
   );
-
-
-
-
 }
 
 export default Home;
