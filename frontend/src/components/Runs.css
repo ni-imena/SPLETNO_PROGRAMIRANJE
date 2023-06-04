@@ -32,3 +32,24 @@
     text-overflow: ellipsis;
     overflow-clip-margin: 10px;
 }
+
+@media screen and (max-width: 800px) {
+    body {
+        font-size: 0.9rem;
+    }
+
+    h5 {
+        font-size: 1rem;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    html, body {
+        font-size: 0.7rem;
+        min-width: 300px;
+    }
+    h5 {
+        font-size: 0.9rem;
+    }
+
+}

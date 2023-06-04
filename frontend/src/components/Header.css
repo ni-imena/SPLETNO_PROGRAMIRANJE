@@ -1,0 +1,25 @@
+.collapse.navbar-collapse {
+    display: none;
+}
+  
+.collapse.navbar-collapse.show {
+    display: block;
+}
+
+/* .navbar-toggler {
+    position: absolute;
+    right: 20px;
+    top: 5px;
+}
+
+.navbar-collapse {
+    z-index: 100;
+}
+
+.navbar-nav {
+    display: inline-block;
+    position: fixed;
+    width: 200px;
+    right: 0px;
+    margin-top: 8px;
+} */

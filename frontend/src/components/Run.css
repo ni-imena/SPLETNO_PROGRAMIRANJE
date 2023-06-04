@@ -1,6 +1,7 @@
 #runMap {
     width: 100%;
     height: calc(100vh - 56px);
+    z-index: 1;
 }
 
 .runData,
@@ -92,10 +93,9 @@
 
 
 .controls .icon:hover {
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
 }
-
 
 
 .controls button,
@@ -142,4 +142,20 @@
     display: flex;
     background-color: #ffffff;
     font-weight: bold;
+}
+
+@media screen and (max-width: 800px) {
+    html, body {
+        min-height: 300px;
+    }
+    body {
+        overflow-y: scroll;
+        height: 1500px;
+    }
+    
+    .sidebarOpen {
+        display: block;
+        position: fixed;
+        left: 0;
+    }
 }

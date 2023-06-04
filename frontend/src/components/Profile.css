@@ -37,3 +37,15 @@
 .profileStravaButton:active {
     background-color: #004599;
 }
+
+@media screen and (max-width: 600px) {
+    html, body {
+      min-width: 300px;
+    }
+
+    .profile {
+        min-width: 200px;
+        width: 80%;
+    }
+
+  }
