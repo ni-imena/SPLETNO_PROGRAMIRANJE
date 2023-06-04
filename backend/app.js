@@ -3,7 +3,6 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-var socketIO = require("socket.io");
 
 // vključimo mongoose in ga povežemo z MongoDB
 var mongoose = require("mongoose");
@@ -21,22 +20,6 @@ var runsRouter = require("./routes/runRoutes");
 var weathersRouter = require("./routes/weatherRoutes");
 var setRunsRouter = require("./routes/setRunRoutes");
 var app = express();
-var server = require("http").Server(app);
-var io = socketIO(server);
-
-io.of("/socket.io").on("connection", (socket) => {
-  console.log("New connection established.");
-
-  // Handle GPS location updates from the client
-  socket.on("gpsUpdate", (location) => {
-    console.log("Received GPS location update:", location);
-
-    // Further processing with the received location data
-  });
-
-  // ... Rest of your socket logic
-});
-
 
 var cors = require("cors");
 var allowedOrigins = ["http://localhost:3000", "http://localhost:3001"];
@@ -44,7 +27,6 @@ app.use(
   cors({
     credentials: true,
     origin: function (origin, callback) {
-      // Allow requests with no origin (mobile apps, curl)
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
         var msg =
@@ -62,6 +44,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+//var server = require("http").createServer(app);
 
 var session = require("express-session");
 var MongoStore = require("connect-mongo");
@@ -73,8 +56,6 @@ app.use(
     store: MongoStore.create({ mongoUrl: mongoDB }),
   })
 );
-
-
 
 //Shranimo sejne spremenljivke v locals
 //Tako lahko do njih dostopamo v vseh view-ih (glej layout.hbs)
@@ -105,5 +86,6 @@ app.use(function (err, req, res, next) {
   //res.render('error');
   res.json(err);
 });
+
 
 module.exports = app;

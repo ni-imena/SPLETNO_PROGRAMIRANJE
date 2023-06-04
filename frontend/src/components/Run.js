@@ -23,6 +23,7 @@ function Run() {
   const [runs, setRuns] = useState([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [tokenExpired, setTokenExpired] = useState(false);
 
   const mapRef = useRef(null);
   const polylineRef = useRef(null);
@@ -32,19 +33,28 @@ function Run() {
 
   useEffect(() => {
     const getRun = async () => {
-      let headers = {};
-      if (userContext.user) {
-        headers = {
-          'Authorization': `Bearer ${userContext.user._id}`
-        };
-      }
+      const token = localStorage.getItem('token');
       const res = await fetch(`http://localhost:3001/runs/${id}`, {
-        headers: headers
+        credentials: "include",
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token
+        }
       });
       const data = await res.json();
-      setRun(data);
-      setActivity(data.activity);
-      setStream(data.stream);
+      if (data.accessToken) {
+        localStorage.setItem('token', data.accessToken);
+      }
+      if (data.message === "Token expired.") {
+        setTokenExpired(true);
+      }
+      else {
+        setTokenExpired(false);
+        setRun(data.run);
+        setActivity(data.run.activity);
+        setStream(data.run.stream);
+      }
     };
     getRun();
     return () => {
@@ -56,17 +66,26 @@ function Run() {
 
   useEffect(function () {
     const fetchRuns = async function () {
-      let headers = {};
-      if (userContext.user) {
-        headers = {
-          'Authorization': `Bearer ${userContext.user._id}`
-        };
-      }
+      const token = localStorage.getItem('token');
       const res = await fetch(`http://localhost:3001/runs/nearby/${id}`, {
-        headers: headers
+        credentials: "include",
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token
+        }
       });
       const data = await res.json();
-      setRuns(data.runs);
+      if (data.accessToken) {
+        localStorage.setItem('token', data.accessToken);
+      }
+      if (data.message === "Token expired.") {
+        setTokenExpired(true);
+      }
+      else {
+        setTokenExpired(false);
+        setRuns(data.runs);
+      }
     };
     fetchRuns();
   }, [userContext]);

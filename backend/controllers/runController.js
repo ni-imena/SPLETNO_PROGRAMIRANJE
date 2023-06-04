@@ -12,11 +12,17 @@ module.exports = {
 
   show: function (req, res) {
     var id = req.params.id;
-    const userId = req.headers.authorization.split(" ")[1];
+    const userId = req.user.userId;
     RunModel.findOne({ _id: id, userId: userId }, function (err, run) {
       if (err) { return res.status(500).json({ message: "Error when getting run.", error: err, }); }
       if (!run) { return res.status(404).json({ message: "No such run", }); }
-      return res.json(run);
+
+      var responseData = {
+        run: run,
+        accessToken: req.newAccessToken
+      };
+      return res.json(responseData);
+      //return res.json(run);
     });
   },
 
@@ -24,7 +30,7 @@ module.exports = {
     try {
       var activityJson = JSON.parse(req.body.activity);
       var streamJson = JSON.parse(req.body.stream);
-    } catch (err) { return res.status(400).json({ message: "Invalid JSON in activity field", }); }
+    } catch (err) { return res.status(400).json({ message: "Invalid JSON in activity or stream fields", }); }
 
     RunModel.find({ "activity.id": activityJson.id }, (err, activity) => {
       if (err) { return res.status(500).json({ message: "Error when getting activity", error: err, }); }
@@ -96,7 +102,7 @@ module.exports = {
 
   nearbyRuns: function (req, res) {
     const id = req.params.id;
-    const userId = req.headers.authorization.split(" ")[1];
+    const userId = req.user.userId;
     RunModel.findOne({ _id: id }, function (err, run) {
       if (err) { return res.status(500).json({ message: "Error when getting run.", error: err, }); }
       if (!run) { return res.status(404).json({ message: "No such run", }); }
@@ -115,8 +121,13 @@ module.exports = {
           const distance = getDistance(coords[0], coords[1], run.location.coordinates[0], run.location.coordinates[1]);
           return { ...run.toObject(), distance };
         });
+        var responseData = {
+          runs: runsWithDistance,
+          accessToken: req.newAccessToken
+        };
+        return res.json(responseData);
 
-        return res.json({ runs: runsWithDistance });
+        //return res.json({ runs: runsWithDistance });
       });
     })
   },

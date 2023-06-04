@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../userContext";
+import { Navigate } from "react-router-dom";
 import queryString from "query-string";
 
 const CLIENT_ID = "105822";
@@ -12,6 +13,7 @@ function RedirectPage() {
   const [accessToken, setAccessToken] = useState(null);
   const navigate = useNavigate();
   const [athlete, setAthlete] = useState(null);
+  const [tokenExpired, setTokenExpired] = useState(false);
 
   const exchangeCodeForToken = useCallback(async () => {
     const queryParams = queryString.parse(window.location.search);
@@ -42,18 +44,26 @@ function RedirectPage() {
   }, [accessToken]);
 
   const saveAthleteId = useCallback(async function () {
-    const res = await fetch(
-      `http://localhost:3001/users/${userContext.user._id}`,
-      {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          stravaId: athlete,
-        }),
-      }
+    const token = localStorage.getItem('token');
+    const res = await fetch(`http://localhost:3001/users/strava/${userContext.user._id}`, {
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json", "Authorization": token },
+      body: JSON.stringify({
+        stravaId: athlete,
+      }),
+    }
     );
-    await res.json();
+    const data = await res.json();
+    if (data.accessToken) {
+      localStorage.setItem('token', data.accessToken);
+    }
+    if (data.message === "Token expired.") {
+      setTokenExpired(true);
+    }
+    else {
+      setTokenExpired(false);
+    }
   }, [userContext.user._id, athlete]);
 
   useEffect(() => {
@@ -80,7 +90,9 @@ function RedirectPage() {
     }
   }, [athlete, navigate, saveAthleteId]);
 
-
+  if (tokenExpired) {
+    return <Navigate replace to="/logout" />;
+  }
   return null;
 }
 

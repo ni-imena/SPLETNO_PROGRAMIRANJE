@@ -1,7 +1,5 @@
 import { useContext, useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, CircleMarker } from 'react-leaflet';
-import io from "socket.io-client";
-
 import "./Home.css";
 import 'leaflet-css';
 
@@ -10,6 +8,45 @@ function Home() {
   const [selectedRun, setSelectedRun] = useState(null);
   const mapRef = useRef(null);
   const [gpsLocation, setGPSLocation] = useState(null);
+  const [socket, setSocket] = useState(null);
+
+
+  useEffect(() => {
+    const newSocket = new WebSocket("ws://localhost:3001");
+
+    newSocket.onopen = function () {
+      console.log("WebSocket connection established.");
+    };
+
+    newSocket.onmessage = function (event) {
+      const newRuns = JSON.parse(event.data);
+      setRuns(newRuns);
+    };
+
+    setSocket(newSocket);
+
+    return function cleanup() {
+      newSocket.close();
+    };
+  }, []);
+
+  const sendLocationData = () => {
+    console.log("socket: " + socket + "gps: " + gpsLocation);
+    if (socket && gpsLocation) {
+      const locationData = JSON.stringify(gpsLocation);
+      socket.send(locationData);
+    }
+  };
+
+  useEffect(() => {
+    sendLocationData();
+    const interval = setInterval(() => {
+      sendLocationData();
+    }, 5000);
+    return function cleanup() {
+      clearInterval(interval);
+    };
+  }, [socket, gpsLocation]);
 
 
   useEffect(function () {
@@ -24,44 +61,26 @@ function Home() {
   useEffect(() => {
     const getLocation = () => {
       if (navigator.geolocation) {
+        console.log(navigator.geolocation);
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const { latitude, longitude } = position.coords;
+            console.log("pos: " + position);
             setGPSLocation({ latitude, longitude });
           },
           (error) => {
+            console.log("error2");
             console.error('Error retrieving GPS location:', error);
           }
         );
+        console.log("huh??");
       } else {
+        console.log("error");
         console.error('Geolocation is not supported by this browser.');
       }
     };
-
     getLocation();
   }, []);
-
-  useEffect(() => {
-    const socket = io("http://localhost:3001");
-    console.log("Socket.IO connection status:", socket.connected);
-    console.log(gpsLocation);
-    // Send GPS location updates to the server
-    socket.emit("gpsUpdate", gpsLocation); // Adjust the location data as needed
-
-    // Handle GPS location updates from the server
-    socket.on("gpsUpdate", (location) => {
-      console.log("Received GPS location update:", location);
-
-      // Further processing with the received location data
-    });
-
-    // Clean up the socket connection when the component unmounts
-    return () => {
-      socket.disconnect();
-    };
-  }, [gpsLocation]);
-
-
 
   const handleRunClick = (run) => {
     mapRef.current.flyTo(run.location.coordinates, 15);
@@ -72,6 +91,8 @@ function Home() {
     if (mapRef.current && gpsLocation) {
       mapRef.current.flyTo([gpsLocation.latitude, gpsLocation.longitude], 15);
     }
+
+    sendLocationData();
   };
 
   return (
@@ -94,20 +115,21 @@ function Home() {
           <ul className="list-group">
             <li className="list-group-item rounded-6 mb-2 title-row homeTitleRow homeListGroupItem">
               <div className="row column-title homeColumnTitle">
-                <div className="col-4">Name</div>
-                <div className="col-3">Distance</div>
-                <div className="col-5">Elevation</div>
+                <div className="col-3">Away</div>
+                <div className="col-5">Name</div>
+                <div className="col-4">Distance</div>
               </div>
             </li>
-            {runs.map((run) => (
-              <button className="homeListGroupItem list-group-item rounded-6 mb-2" key={run._id} onClick={() => handleRunClick(run)}>
-                <div className="row align-items-center homeColumnItem">
-                  <div className="col-4"><h5 className="mb-0 homeTruncate">{run.name}</h5></div>
-                  <div className="col-3"><span className="mb-0 homeTruncate">{`${(run.distance / 1000).toFixed(2)} km`}</span></div>
-                  <div className="col-5">{run.location.coordinates}</div>
-                </div>
-              </button>
-            ))}
+            {runs.sort((a, b) => a.distanceFromUser - b.distanceFromUser)
+              .map((run) => (
+                <button className="homeListGroupItem list-group-item rounded-6 mb-2" key={run._id} onClick={() => handleRunClick(run)}>
+                  <div className="row align-items-center homeColumnItem">
+                    <div className="col-3">{run.distanceFromUser ? `${(run.distanceFromUser).toFixed(2)} km` : "Loading..."}</div>
+                    <div className="col-5"><h5 className="mb-0 homeTruncate">{run.name}</h5></div>
+                    <div className="col-4"><span className="mb-0 homeTruncate">{`${(run.distance / 1000).toFixed(2)} km`}</span></div>
+                  </div>
+                </button>
+              ))}
           </ul>
         </div>
       )}

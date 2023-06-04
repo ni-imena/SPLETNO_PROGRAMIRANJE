@@ -1,5 +1,4 @@
 var mongoose = require("mongoose");
-const jwt = require('jsonwebtoken');
 var Schema = mongoose.Schema;
 
 var refreshTokenSchema = new Schema({
@@ -8,7 +7,7 @@ var refreshTokenSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "user",
     },
-    createdAt: { type: Date, default: Date.now, expires: 1209600 }
+    createdAt: { type: Date, default: Date.now, expires: 172800 }
 });
 
 module.exports = mongoose.model("refreshToken", refreshTokenSchema);

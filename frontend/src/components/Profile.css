@@ -16,7 +16,8 @@
     margin-bottom: 10px;
 }
 
-.profileStravaButton {
+.profileStravaButton,
+.profileAssignButton {
     display: inline-block;
     padding: 8px 16px;
     font-size: 14px;
@@ -30,11 +31,13 @@
     background-color: #007bff;
 }
 
-.profileStravaButton:hover {
+.profileStravaButton:hover,
+.profileAssignButton:hover {
     background-color: #0056b3;
 }
 
-.profileStravaButton:active {
+.profileStravaButton:active,
+.profileAssignButton:active {
     background-color: #004599;
 }
 

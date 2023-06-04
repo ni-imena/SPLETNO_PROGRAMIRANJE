@@ -7,6 +7,8 @@ const refreshSecretKey = 'your_secret_key';
 function verifyToken(req, res, next) {
     const token = req.headers.authorization;
     const userId = req.session.userId;
+
+    //console.log(token);
     if (!token) {
         return res.status(401).json({ message: 'No token provided.' });
     }
@@ -15,25 +17,20 @@ function verifyToken(req, res, next) {
         if (err) {
             if (err.name === 'TokenExpiredError') {
                 getRefreshToken(userId, function (err, rToken) {
-                    if (err) {
-                        return res.status(401).json({ message: 'Token expired.' });
-                    } else if (rToken) {
+                    if (err) { return res.status(401).json({ message: 'Token expired.' }); }
+                    else if (rToken) {
                         jwt.verify(rToken, refreshSecretKey, (err, decoded) => {
-                            if (err) {
-                                return res.status(402).json({ message: 'Token expired.' });
-                            }
+                            if (err) { return res.status(402).json({ message: 'Token expired.' }); }
                             const newAccessToken = makeAccessToken(userId)
                             req.user = decoded;
                             req.newAccessToken = newAccessToken;
                             next();
                         })
-                    } else {
-                        return res.status(403).json({ message: 'Token expired.' });
                     }
+                    else { return res.status(403).json({ message: 'Token expired.' }); }
                 });
-            } else {
-                return res.status(404).json({ message: err });
             }
+            else { return res.status(404).json({ message: err }); }
         }
         else {
             req.user = decoded;
@@ -67,6 +64,15 @@ function makeAccessToken(userId) {
 }
 
 function makeRefreshToken(userId) {
+    RefreshTokenModel.findOneAndRemove({ userId: userId }, function (err, refreshToken) {
+        if (err) {
+            return res.status(500).json({
+                message: "Error when deleting the token.",
+                error: err,
+            });
+        }
+    });
+
     const payload = {
         userId: userId,
     };
@@ -76,11 +82,13 @@ function makeRefreshToken(userId) {
         userId: userId,
     });
 
+
     refreshToken.save(function (err) {
         if (err) {
             console.error('Error saving RefreshToken:', err);
         }
     });
+
 }
 
 module.exports = {

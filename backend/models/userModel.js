@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 var Schema = mongoose.Schema;
 const { makeAccessToken, makeRefreshToken } = require("../config/jwtUtils.js");
 
-
 var userSchema = new Schema({
   username: String,
   password: String,
@@ -12,41 +11,6 @@ var userSchema = new Schema({
   stravaId: String,
   admin: Boolean
 });
-
-//iskanje tekov okoli uporabnika
-/* geospatial queries
-
-const mongoose = require('mongoose');
-
-const locationSchema = new mongoose.Schema({
-  name: String,
-  coordinates: {
-    type: [Number],
-    index: '2dsphere' // Enable the 2dsphere index for geospatial queries
-  }
-});
-
-const Location = mongoose.model('Location', locationSchema);
-
-
-*/
-/* poizvedba
-
-// Find locations within a certain radius
-const { latitude, longitude, radius } = req.query;
-const coordinates = [parseFloat(longitude), parseFloat(latitude)];
-const locations = await Location.find({
-  coordinates: {
-    $near: {
-      $geometry: {
-        type: 'Point',
-        coordinates
-      },
-      $maxDistance: radius
-    }
-  }
-});
-*/
 
 userSchema.pre("save", function (next) {
   var user = this;

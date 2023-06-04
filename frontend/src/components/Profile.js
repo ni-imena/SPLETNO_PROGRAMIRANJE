@@ -46,6 +46,31 @@ function Profile() {
     window.location.href = stravaAuthUrl;
   };
 
+  const handleAssign = () => {
+    const updateRuns = async () => {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:3001/users/assignruns/${profile._id}`, {
+        credentials: 'include',
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token
+        },
+      });
+      const data = await res.json();
+      if (data.accessToken) {
+        localStorage.setItem('token', data.accessToken);
+      }
+      if (data.message === "Token expired.") {
+        setTokenExpired(true);
+      }
+      else {
+        setTokenExpired(false);
+      }
+    }
+    updateRuns();
+  }
+
   if (tokenExpired) {
     return <Navigate replace to="/logout" />;
   }
@@ -66,9 +91,13 @@ function Profile() {
           Authorize Strava
         </button>
       )}
+      {profile.stravaId && (
+        <button className="btn btn-primary profileAssignButton" onClick={handleAssign}>
+          Assign Runs
+        </button>
+      )}
     </div>
   );
-
 }
 
 export default Profile;

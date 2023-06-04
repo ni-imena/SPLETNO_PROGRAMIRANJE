@@ -1,6 +1,6 @@
 {
-  "name": "vaja3",
-  "version": "0.0.0",
+  "name": "ni_imena",
+  "version": "0.8.3",
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
@@ -22,6 +22,6 @@
     "morgan": "~1.9.1",
     "multer": "^1.4.4",
     "nodemon": "^2.0.22",
-    "socket.io": "^4.6.2"
+    "ws": "^8.13.0"
   }
 }
