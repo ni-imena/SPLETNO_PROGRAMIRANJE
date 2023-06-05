@@ -5,24 +5,16 @@ module.exports = {
   list: function (req, res) {
     UserModel.find(function (err, users) {
       if (err) { return res.status(500).json({ message: "Error when getting user.", error: err }); }
-      const updatedUsers = [];
-      users.forEach((user, index) => {
-        RunModel.countDocuments({ userId: user._id }, function (err, count) {
-          if (err) { return res.status(500).json({ message: "Error when counting documents.", error: err }); }
-          const updatedUser = { ...user.toObject(), docsPosted: count };
-          updatedUsers.push(updatedUser);
-          if (index === users.length - 1) {
-            var responseData = {
-              users: updatedUsers,
-              accessToken: req.newAccessToken
-            };
-            return res.json(responseData);
-          }
-        });
-      });
-    });
+
+      var responseData = {
+        users: users,
+        accessToken: req.newAccessToken
+      };
+      return res.json(responseData);
+    }
+    )
   },
-  
+
   show: function (req, res) {
     var id = req.params.id;
 

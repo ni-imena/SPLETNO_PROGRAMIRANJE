@@ -16,6 +16,7 @@ function Home() {
 
     newSocket.onopen = function () {
       console.log("WebSocket connection established.");
+      sendLocationData();
     };
 
     newSocket.onmessage = function (event) {
@@ -39,10 +40,9 @@ function Home() {
   };
 
   useEffect(() => {
-    sendLocationData();
     const interval = setInterval(() => {
       sendLocationData();
-    }, 5000);
+    }, 2000);
     return function cleanup() {
       clearInterval(interval);
     };
@@ -62,6 +62,7 @@ function Home() {
     const getLocation = () => {
       if (navigator.geolocation) {
         console.log(navigator.geolocation);
+        const options = {timeout: 10000};
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const { latitude, longitude } = position.coords;
@@ -69,13 +70,11 @@ function Home() {
             setGPSLocation({ latitude, longitude });
           },
           (error) => {
-            console.log("error2");
             console.error('Error retrieving GPS location:', error);
-          }
+          },
+          options
         );
-        console.log("huh??");
       } else {
-        console.log("error");
         console.error('Geolocation is not supported by this browser.');
       }
     };
