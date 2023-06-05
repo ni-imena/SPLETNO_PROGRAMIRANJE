@@ -141,7 +141,7 @@ button:hover, input[type="submit"]:hover {
     transition: 0.1s ease-in-out;
 }
 
-input[type="checkbox"] {
+#rememberUsername {
   appearance: none;
   border: 2px solid black;
   width: 20px;
@@ -149,13 +149,13 @@ input[type="checkbox"] {
   background-color: white;
 }
 
-input[type="checkbox"]:checked {
+#rememberUsername:checked {
   background-color: white;
   border-color: black;
   color: black;
 }
 
-input[type="checkbox"] + label {
+#rememberUsername + label {
   position: relative;
   display: inline-block;
   width: 20px;
@@ -163,7 +163,7 @@ input[type="checkbox"] + label {
   cursor: pointer;
 }
 
-input[type="checkbox"] + label:after {
+#rememberUsername + label:after {
   content: "";
   display: none;
   position: absolute;
@@ -176,7 +176,7 @@ input[type="checkbox"] + label:after {
   transform: rotate(43deg);
 }
 
-input[type="checkbox"]:checked + label:after {
+#rememberUsername:checked + label:after {
   display: block;
 }
 
