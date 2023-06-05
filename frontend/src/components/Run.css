@@ -37,31 +37,26 @@
     font-weight: bold;
 }
 
-.addRunPopup {
+.addRun, .addRunPopup {
     bottom: 20px;
     right: 20px;
     width: auto;
+    position: absolute;
+    background: white;
+    padding: 5px;
+    border: 3px solid black;
+    border-radius: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    z-index: 50;
+    overflow-x: hidden;
+    transition: 0.3s ease-in-out;
+}
+
+.addRunPopup {
     min-width: 75%;
     max-height: 80%;
     overflow-y: scroll;
-    position: absolute;
-    background: white;
-    padding: 5px;
-    border: 3px solid black;
-    border-radius: 10px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
-}
-
-.addRun {
-    bottom: 20px;
-    right: 20px;
-    width: auto;
-    position: absolute;
-    background: white;
-    padding: 5px;
-    border: 3px solid black;
-    border-radius: 10px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+    padding-left: 50px;
 }
 
 .addRunButtonClose {
@@ -75,12 +70,14 @@
 
 .addRunButtonOpen {
     background: none;
-    border: none;
     font-size: 1.8rem;
     text-align: center;
     font-weight: bold;
-    padding: 0px 10px;
-    width: 100%;
+    border: 3px solid black;
+    padding: 10px 120px;
+    border-radius: 15px;
+    display: block;
+    margin: 10px auto 30px;
 }
 
 .controls {
@@ -144,18 +141,141 @@
     font-weight: bold;
 }
 
+.sidebarPopup {
+    position: absolute;
+    display: inline-block;
+    margin: 5px;
+    top: 60px;
+    right: 0px;
+    background: white;
+    border-radius: 10px;
+    border: 3px solid black;
+    z-index: 10;
+}
+
+.sidebarOpen {
+    max-height: calc(100% - 90px);
+    overflow: auto;
+}
+
+.sidebarButton {
+    background: none;
+    border: none;
+    padding: 0px 10px;
+    font-size: 2.2rem;
+    font-weight: bold;
+}
+
+.sidebarPointer {
+    display: none;
+}
+
 @media screen and (max-width: 800px) {
+    body {
+        overflow-y: scroll;
+    }
+    
+    .sidebarOpen, .graph-container svg{
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 0px;
+        width: 90%;
+        margin: 5px;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+
+    .addRunPopup ul h6{
+        font-size: 0.7rem;
+    }
+
+    .addRunButtonOpen {
+        font-size: 1.2rem;
+        border: 2px solid black;
+        padding: 10px 80px;
+        margin: 10px auto 20px;
+    }
+    .sidebarPointer {
+        display: inline-block;
+        position: absolute;
+        bottom: 20px;
+        left: 270px;
+        background-color: white;
+        border: 3px solid black;
+        border-radius: 15px;
+        padding: 5px 10px 2px;
+    }
+}
+@media screen and (max-width: 600px) {
+    .graph-container svg {
+        left: -60px;
+        transform: scale(0.7);
+        font-size: 2rem;
+    }
+
+    .sidebarPopup, .addRunPopup, .addRun, .controls, .sidebarPointer, .runData {
+        border: 2px solid black;
+    }
+
+    .sidebarClosed {
+        top: 40px;
+        right: 5px;
+    }
+
+    .controls {
+        bottom: 10px;
+        left: 10px;
+    }
+
+    .runData {
+        left: 10px;
+        bottom: 95px;
+    }
+
+    .addRun {
+        bottom: 35px;
+        right: 10px;
+    }
+
+    .addRunPopup {
+        bottom: 35px;
+        right: 10px;
+        padding-left: 20px;
+    }
+
+    .addRunButtonOpen {
+        padding: 10px 60px;
+    }
+
+    .sidebarPointer {
+        bottom: 10px;
+        left: 183px;
+    }
+}
+
+@media screen and (max-width: 450px) {
     html, body {
         min-height: 300px;
     }
-    body {
-        overflow-y: scroll;
-        height: 1500px;
+
+    .graph-container svg {
+        left: -100px;
+        transform: scale(0.55);
     }
-    
-    .sidebarOpen {
-        display: block;
-        position: fixed;
-        left: 0;
+
+    .controls {
+        bottom: 10px;
+        left: 5px;
+    }
+
+    .runData {
+        left: 5px;
+        bottom: 95px;
+    }
+
+    .addRun {
+        bottom: 35px;
+        right: 5px;
     }
 }

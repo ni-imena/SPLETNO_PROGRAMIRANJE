@@ -333,13 +333,19 @@ function Run() {
     setIsPopupOpen(!isPopupOpen);
   };
 
+  let scrollToBottom = () => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth'
+    });
+  }
+
   return (
     <div>
       <div>
         {stream && runs && (
           <MapContainer ref={mapRef} className="runMap" id="runMap" center={calculateCenter(stream.latlng.data)} zoom={15} doubleClickZoom={false}>
             <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>" />
-            <Sidebar stream={stream} current={current} speed={speed} />
             {/* <CircleMarker center={calculateCenter(stream.latlng.data)} radius={5} color="blue" fillColor="blue" fillOpacity={1} /> */}
             {isPlotting && (
               <div className='runData'>
@@ -376,46 +382,56 @@ function Run() {
                 <button className="icon" onClick={handleRunStartClick}><i className="fas fa-play"></i></button>)}
               <button className="icon" onClick={() => handleRunSpeedClick('high')}><i className="fas fa-step-forward"></i></button>
             </div>
-            <div className={isPopupOpen ? "addRunPopup" : "addRun"}>
-              {isPopupOpen && (
-                <div className="popup">
-                  <div className="popup-content">
-                    <ul className="list-group">
-                      <li className="list-group-item rounded-6 mb-2 title-row runTitleRow runsListGroupItem">
-                        <div className="row column-title runColumnTitle">
-                          <div className="col-2">Away</div>
-                          <div className="col-2">Name</div>
-                          <div className="col-2">Date</div>
-                          <div className="col-2">Time</div>
-                          <div className="col-2">Distance</div>
-                          <div className="col-2">Elevation</div>
-                        </div>
-                      </li>
-                      {runs
-                        .sort((a, b) => a.distance - b.distance)
-                        .map((run) => (
-                          <button className="list-group-item rounded-6 mb-2 item-row runItemRow runsListGroupItem" key={run._id} /*onClick={handleAddRun}*/>
-                            <div className="row align-items-center column-item runColumnItem">
-                              <div className="col-2"><h6 className="mb-0">{run.distance.toFixed(2)} km</h6></div>
-                              <div className="col-2"><h6 className="mb-0">{run.activity.name}</h6></div>
-                              <div className="col-2"><h6 className="mb-0">{moment(run.activity.start_date).format("D/M/YYYY")}</h6></div>
-                              <div className="col-2"><h6 className="mb-0">{formatTime(run.activity.elapsed_time)}</h6></div>
-                              <div className="col-2"><h6 className="mb-0">{`${(run.activity.distance / 1000).toFixed(2)} km`}</h6></div>
-                              <div className="col-2"><h6 className="mb-0">{run.stream.altitude && run.stream.altitude.data ? getElevation(run.stream.altitude.data) + "m" : ''}</h6></div>
-                            </div>
-                          </button>
-                        ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-              {isPopupOpen ?
-                (<button className="addRunButtonOpen" onClick={handlePopup}>Hide</button>) :
-                (<button className="addRunButtonClose" onClick={handlePopup}>Add Run</button>)
-              }
-            </div>
+            {sidebarVisible && (
+              <button className="sidebarButton sidebarPointer" onClick={() => scrollToBottom()}>
+                <i className="fas fa-hand-point-down"></i>
+              </button>
+            )}
           </MapContainer>
         )}
+      </div>
+      <div>
+        {stream && runs && (
+          <Sidebar stream={stream} current={current} speed={speed} />
+        )}
+      </div>
+      <div className={isPopupOpen ? "addRunPopup" : "addRun"}>
+        {isPopupOpen && (
+          <div className="popup">
+            <div className="popup-content">
+              <ul className="list-group">
+                <li className="list-group-item rounded-6 mb-2 title-row runTitleRow runsListGroupItem">
+                  <div className="row column-title runColumnTitle">
+                    <div className="col-2">Away</div>
+                    <div className="col-2">Name</div>
+                    <div className="col-2">Date</div>
+                    <div className="col-2">Time</div>
+                    <div className="col-2">Distance</div>
+                    <div className="col-2">Elevation</div>
+                  </div>
+                </li>
+                {runs
+                  .sort((a, b) => a.distance - b.distance)
+                  .map((run) => (
+                    <button className="list-group-item rounded-6 mb-2 item-row runItemRow runsListGroupItem" key={run._id} /*onClick={handleAddRun}*/>
+                      <div className="row align-items-center column-item runColumnItem">
+                        <div className="col-2"><h6 className="mb-0">{run.distance.toFixed(2)} km</h6></div>
+                        <div className="col-2"><h6 className="mb-0">{run.activity.name}</h6></div>
+                        <div className="col-2"><h6 className="mb-0">{moment(run.activity.start_date).format("D/M/YYYY")}</h6></div>
+                        <div className="col-2"><h6 className="mb-0">{formatTime(run.activity.elapsed_time)}</h6></div>
+                        <div className="col-2"><h6 className="mb-0">{`${(run.activity.distance / 1000).toFixed(2)} km`}</h6></div>
+                        <div className="col-2"><h6 className="mb-0">{run.stream.altitude && run.stream.altitude.data ? getElevation(run.stream.altitude.data) + "m" : ''}</h6></div>
+                      </div>
+                    </button>
+                  ))}
+              </ul>
+            </div>
+          </div>
+        )}
+        {isPopupOpen ?
+          (<button className="addRunButtonOpen" onClick={handlePopup}>Hide</button>) :
+          (<button className="addRunButtonClose" onClick={handlePopup}>Add Run</button>)
+        }
       </div>
     </div>
   );

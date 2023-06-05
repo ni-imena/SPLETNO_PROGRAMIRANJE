@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import Graph from "./Graph"
-import "./Sidebar.css"
 
 function MyComponent(props) {
     const [sidebarVisible, setSidebarVisible] = useState(false);
-
+    
     return (
         <div className={"sidebar sidebarPopup " + (sidebarVisible ? "sidebarOpen" : "sidebarClosed")}>
             <button className="sidebarButton" onClick={() => setSidebarVisible(!sidebarVisible)}>
                 <i className={sidebarVisible ? "fas fa-multiply" : "fas fa-bars"}></i>
             </button>
+
             {props.stream && sidebarVisible && props.stream.distance?.data && (
                 <div>
                     {<Graph data={props.stream} index={props.current} kilometers={props.stream.distance.data} speed={props.speed} />}
