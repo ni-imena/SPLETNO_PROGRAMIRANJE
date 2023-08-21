@@ -1,5 +1,5 @@
 var mongoose = require("mongoose");
-var bcrypt = require("bcrypt");
+var bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
 var Schema = mongoose.Schema;
 const { makeAccessToken, makeRefreshToken } = require("../config/jwtUtils.js");
