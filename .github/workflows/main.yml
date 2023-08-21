@@ -30,9 +30,3 @@ jobs:
           docker-compose build
           docker push $DOCKER_IMAGE_FRONTEND
           docker push $DOCKER_IMAGE_BACKEND
-      - name: Send webhook notification
-        uses: joelwmale/webhook-action@2.3.2
-        with:
-          url: http://20.126.63.144:1337/log-github-webhook
-          method: POST
-          body: '{"message": "Docker image has been built and pushed."}'
