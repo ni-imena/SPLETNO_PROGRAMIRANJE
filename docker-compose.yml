@@ -1,6 +1,7 @@
 version: '3'
 services:
   frontend:
+    image: mjorkk/ni_imena:backend
     build:
       context: .
       dockerfile: frontend/Dockerfile
@@ -10,6 +11,7 @@ services:
       - backend
 
   backend:
+    image: mjorkk/ni_imena:frontend
     build:
       context: .
       dockerfile: backend/Dockerfile
